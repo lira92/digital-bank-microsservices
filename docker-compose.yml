@@ -1,9 +1,25 @@
+version: '3'
+
 services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
+    labels:
+      - "traefik.enabled=false"
     ports:
       - 5672:5672
       - 15672:15672
     volumes:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+  api-gateway:
+    image: traefik:v3.0
+    command: --api.insecure=true --providers.docker
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  whoami:
+    image: traefik/whoami
+    labels:
+      - "traefik.http.routers.whoami.rule=Path(`/whoami`)"
