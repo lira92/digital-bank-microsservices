@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+pika
+aio_pika
+email-validator
