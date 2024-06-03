@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  db-investiment:
+    image: mysql:latest
+    restart: always
+    env_file:
+      - api/.env
+    environment:
+      TZ: America/Sao_Paulo
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_TCP_PORT: 3306
+    ports:
+      - 3306:3306
+    command: ["--event-scheduler=ON"]
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 30s
+      retries: 10
+    networks:
+      - database-network-cpa
+
+  backend-cpa:
+    build: . 
+    restart: always
+    ports:
+      - 8080:8080
+    command: mvn spring-boot:run
+    depends_on:
+      db-investiment:
+        condition: service_healthy
+    networks:
+      - database-network-cpa
+
+networks:
+  database-network-cpa:
+      driver: bridge    
