@@ -2,7 +2,8 @@ version: '3.9'
 
 services:
   db-investiment:
-    image: mysql:latest
+    container_name: db-investiment
+    image: mysql:8.1.0
     restart: always
     env_file:
       - api/.env
@@ -18,10 +19,11 @@ services:
       timeout: 30s
       retries: 10
     networks:
-      - database-network-cpa
+      - database-network-investiment
 
-  backend-cpa:
+  api-investiment:
     build: . 
+    container_name: api-investiment
     restart: always
     ports:
       - 8080:8080
@@ -30,8 +32,8 @@ services:
       db-investiment:
         condition: service_healthy
     networks:
-      - database-network-cpa
+      - database-network-investiment
 
 networks:
-  database-network-cpa:
+  database-network-investiment:
       driver: bridge    
