@@ -40,23 +40,19 @@ public class Goal {
     @Column(name = "current_value", nullable = false)
     @Builder.Default
     private float currentValue = 0.0f;
-
     @Column(name = "target_value", nullable = false)
     @NotBlank(message = "Valor do objetivo não pode estar vazio")
     private double targetValue;
     @Column(name = "target_date", nullable = false)
     @NotBlank(message = "Data limite não pode estar vazia")
     private Date targetDate;
-
     @Column(name = "user_id", nullable = false)
     @NotBlank(message = "Id do usuário não pode estar vazio")
     private Long userId;
-
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
     @Builder.Default
     private boolean deleted = false;
 }

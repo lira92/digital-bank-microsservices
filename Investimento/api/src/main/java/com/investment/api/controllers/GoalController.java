@@ -43,8 +43,10 @@ public class GoalController {
         Optional<Goal> goal = goalRepository.findById(id);
         if (goal.isPresent()) {
         	Goal existingGoal = goal.get();
-        	existingGoal.setDescription(goalDetails.getName());
-        	existingGoal.set(goalDetails.getName());
+        	existingGoal.setName(goalDetails.getName());
+        	existingGoal.setCurrentValue(goalDetails.getCurrentValue());
+            existingGoal.setTargetValue(goalDetails.getTargetValue());
+            existingGoal.setTargetDate(goalDetails.getTargetDate());
         	
             return ResponseEntity.ok(goalRepository.save(existingGoal));
         } else {

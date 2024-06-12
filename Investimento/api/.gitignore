@@ -39,3 +39,4 @@ mvnw
 .env
 env.properties
 /.apt_generated_tests/
+/bin/
