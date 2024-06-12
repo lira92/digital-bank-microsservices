@@ -42,7 +42,7 @@ curl --request POST \
       "goal_name": "name",
       "target_value": 1000.50,
       "target_date": "2024-01-30",
-      "deduction_date": 15 
+      "deduction_date": 15
   }'
 ```
 
