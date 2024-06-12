@@ -34,8 +34,8 @@ public class MovimentacaoService {
 	MovimentacaoRepository repository;
 	@Autowired
     private EntityManager entityManager;
-	
-	
+
+
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public MovimentacaoVO findById(Long id) {
 		if (id == null) throw new MinhaException("Id deve ser preenchido!");
@@ -44,7 +44,7 @@ public class MovimentacaoService {
 		movimentacao.add(linkTo(methodOn(MovimentacaoController.class).findById(id)).withSelfRel());
 		return movimentacao;
 	}
-	
+
 	public List<MovimentacaoVO> filtragem(FiltragemDTO filtros, Integer page) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Movimentacao> cq = cb.createQuery(Movimentacao.class);

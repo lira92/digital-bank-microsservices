@@ -44,7 +44,7 @@ public class ContaService {
 	MovimentacaoRepository movimentacaoRepository;
 	@Autowired
 	private RestTemplate restTemplate;
-	
+
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public List<ContaVO> findAll(Integer page){
 		int number = page * 10;
@@ -52,7 +52,7 @@ public class ContaService {
 		contas.stream().forEach(conta -> conta.add(linkTo(methodOn(ContaController.class).findById(conta.getKey())).withSelfRel()));
 		return contas;
 	}
-	
+
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public ContaVO findById(Long id) {
 		if (id == null) throw new MinhaException("Id deve ser preenchido!");
@@ -61,7 +61,7 @@ public class ContaService {
 		conta.add(linkTo(methodOn(ContaController.class).findById(id)).withSelfRel());
 		return conta;
 	}
-	
+
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public ContaVO findByNumero(Long numero) {
 		if (numero == null) throw new MinhaException("Número deve ser preenchido!");
@@ -70,7 +70,7 @@ public class ContaService {
 		conta.add(linkTo(methodOn(ContaController.class).findById(conta.getKey())).withSelfRel());
 		return conta;
 	}
-	
+
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public double findSaldoByNumero(Long numero) {
 		if (numero == null) throw new MinhaException("Número deve ser preenchido!");
@@ -78,7 +78,7 @@ public class ContaService {
 		Conta conta = repository.findByNumero(numero);
 		return conta.getSaldo();
 	}
-	
+
 	@Transactional
 	public ContaVO save(ContaVO conta) {
 		if (conta.getKey() != null) throw new MinhaException("Id não deve ser preenchido!");
@@ -97,7 +97,7 @@ public class ContaService {
 		Long randomLong = null;
 		while (flag == false){
 			randomLong = (long) random.nextInt((99999 - 10000) + 1) + 10000;
-			if (repository.existsByNumero(randomLong) == 0) flag = true; 
+			if (repository.existsByNumero(randomLong) == 0) flag = true;
 		}
 		conta.setNumero(randomLong);
 		conta.setStatus(true);
@@ -107,7 +107,7 @@ public class ContaService {
 		contaVO.add(linkTo(methodOn(ContaController.class).findById(contaVO.getKey())).withSelfRel());
 		return contaVO;
 	}
-	
+
 	@Transactional
 	public ContaVO enableAndDesable(Long numero) {
 		if (numero == null) throw new MinhaException("Número deve ser preenchido!");
@@ -122,7 +122,7 @@ public class ContaService {
 		contaVO.add(linkTo(methodOn(ContaController.class).findById(contaVO.getKey())).withSelfRel());
 		return contaVO;
 	}
-	
+
 	@Transactional
 	public ContaVO debitar(MovimentacaoDTO movimentacao) {
 		if (movimentacao.getNumero() == null) throw new MinhaException("Número deve ser preenchido!");
@@ -151,7 +151,7 @@ public class ContaService {
 		contaVO.add(linkTo(methodOn(ContaController.class).findById(contaVO.getKey())).withSelfRel());
 		return contaVO;
 	}
-	
+
 	@Transactional
 	public ContaVO creditar(MovimentacaoDTO movimentacao) {
 		if (movimentacao.getNumero() == null) throw new MinhaException("Número deve ser preenchido!");
@@ -166,14 +166,14 @@ public class ContaService {
 		contaVO.add(linkTo(methodOn(ContaController.class).findById(contaVO.getKey())).withSelfRel());
 		return contaVO;
 	}
-	
+
 	public String encriptPassword(String password) {
 		Map<String, PasswordEncoder> encoders = new HashMap<>();
 		Pbkdf2PasswordEncoder pbkdf2Encoder = new Pbkdf2PasswordEncoder("", 8, 185000, SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
 		encoders.put("pbkdf2", pbkdf2Encoder);
 		DelegatingPasswordEncoder passwordEncoder = new DelegatingPasswordEncoder("pbkdf2", encoders);
 		passwordEncoder.setDefaultPasswordEncoderForMatches(pbkdf2Encoder);
-		
+
 		String result = passwordEncoder.encode(password);
 		return result;
 	}

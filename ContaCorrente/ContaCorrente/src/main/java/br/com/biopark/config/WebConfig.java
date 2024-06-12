@@ -18,13 +18,13 @@ import br.com.biopark.serialization.converter.YamlJackson2HttpMessageConverter;
 public class WebConfig implements WebMvcConfigurer{
 
 	private static final MediaType MEDIA_TYPE_APPLICATION_YML = MediaType.valueOf("application/x-yaml");
-	
+
 	@Value("${cors.originPatterns:default}")
 	private String corsOriginPatterns = "";
-	
+
 	@Override
 	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-		
+
 		// via HEADER PARAM
 		configurer.favorParameter(false).
 		ignoreAcceptHeader(false).
@@ -34,7 +34,7 @@ public class WebConfig implements WebMvcConfigurer{
 			mediaType("xml", MediaType.APPLICATION_XML).
 			mediaType("x-yaml", MEDIA_TYPE_APPLICATION_YML);
 	}
-	
+
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 		converters.add(new YamlJackson2HttpMessageConverter());
@@ -47,7 +47,7 @@ public class WebConfig implements WebMvcConfigurer{
 			.allowedMethods("*")
 			.allowedOriginPatterns(allowedOrigins);
 	}
-	
+
 	@Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
