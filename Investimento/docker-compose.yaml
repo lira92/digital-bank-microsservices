@@ -22,7 +22,7 @@ services:
       - database-network-investiment
 
   api-investiment:
-    build: . 
+    build: .
     container_name: api-investiment
     restart: always
     ports:

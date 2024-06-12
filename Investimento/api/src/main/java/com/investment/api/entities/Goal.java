@@ -33,16 +33,19 @@ public class Goal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "name", nullable = false)
     @ColumnTransformer(write = "LOWER(?)")
     @NotBlank(message = "Nome do objetivo não pode estar vazio")
     private String name;
+    
     @Column(name = "current_value", nullable = false)
     @Builder.Default
     private float currentValue = 0.0f;
     @Column(name = "target_value", nullable = false)
     @NotBlank(message = "Valor do objetivo não pode estar vazio")
     private double targetValue;
+    
     @Column(name = "target_date", nullable = false)
     @NotBlank(message = "Data limite não pode estar vazia")
     private Date targetDate;
