@@ -1,0 +1,22 @@
+server:
+  port: 3003
+cors:
+  originPatterns: http://localhost:*
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://db:3306/contacorrente?useTimezone=true&serverTimezone=UTC
+    username: root
+    password: admin123
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    show-sql: false
+springdoc:
+  pathsToMatch: 
+  - /api/**
+  swagger-ui:
+    use-root-path: true
