@@ -1,1 +1,1 @@
-web: env RUBY_DEBUG_OPEN=true bin/rails server -b 0.0.0.0
+web: rm -f tmp/pids/server.pid && env RUBY_DEBUG_OPEN=true bin/rails server -b 0.0.0.0

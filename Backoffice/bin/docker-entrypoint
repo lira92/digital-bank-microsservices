@@ -1,8 +1,18 @@
 #!/bin/bash -e
 
-# If running the rails server then create or migrate existing database
-if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
-  ./bin/rails db:prepare
+check_and_create_database() {
+  echo "Checking and creating databases if not exists..."
+  ./bin/rails db:create
+}
+
+run_migrations() {
+  echo "Running pending migrations..."
+  ./bin/rails db:migrate
+}
+
+if [ "${1}" == "./bin/dev" ]; then
+  check_and_create_database
+  run_migrations
 fi
 
-exec "${@}"
+exec "$@"
