@@ -15,19 +15,6 @@ services:
       - POSTGRES_PASSWORD=Dev!123
       - POSTGRES_PORT=5432
 
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    restart: always
-    container_name: backoffice_rabbitMq
-    networks:
-      - backoffice_network
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-
   api:
     build: .
     container_name: backoffice_api
@@ -35,7 +22,6 @@ services:
       - backoffice_network
     depends_on:
       - postgres
-      - rabbitmq
     ports:
       - '3000:3000'
     volumes:
