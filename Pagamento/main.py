@@ -14,7 +14,7 @@ app = FastAPI()
 
 
 @app.post("/transferir")
-def pay(payment: Union[Payment, str] = None):
+def transferir(payment: Union[Payment, str] = None):
 
     requests.patch(
         BASE_URL + "conta/creditar",
@@ -33,4 +33,16 @@ def pay(payment: Union[Payment, str] = None):
             }
         )
 
+    # send notification
     return {"message": "Pagamento realizado com sucesso"}
+
+@app.post("/pagar-boleto")
+def pagar_boleto(boleto: str):
+    requests.patch(
+        BASE_URL + "boleto/pagar",
+        json={
+            "boleto": boleto
+        }
+    )
+
+    return {"message": "Boleto pago com sucesso"}
