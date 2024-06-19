@@ -18,7 +18,6 @@ import br.com.biopark.dtos.FiltragemDTO;
 import br.com.biopark.exceptions.MinhaException;
 import br.com.biopark.mapper.Mapper;
 import br.com.biopark.models.Movimentacao;
-import br.com.biopark.repositories.CustomRepository;
 import br.com.biopark.repositories.MovimentacaoRepository;
 import br.com.biopark.vos.MovimentacaoVO;
 import jakarta.persistence.EntityManager;
@@ -33,8 +32,6 @@ public class MovimentacaoService {
 
 	@Autowired
 	MovimentacaoRepository repository;
-	@Autowired
-	CustomRepository customRepository;
 	@Autowired
     private EntityManager entityManager;
 	
