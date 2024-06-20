@@ -28,7 +28,7 @@ public class EmailListener {
     public void receiveNotificationMessage(
         @Payload Message emailRequest
     ) throws MessagingException, JsonProcessingException {
-        LOGGER.info("Received email request:" + new String(emailRequest.getBody()));
+        LOGGER.info("Received email request: {}", new String(emailRequest.getBody()));
         String emailRequestAsString = new String(emailRequest.getBody());
         EmailRequest emailRequestObject = new ObjectMapper().readValue(emailRequestAsString, EmailRequest.class);
         LOGGER.info("Email request object: {}", emailRequestObject);
