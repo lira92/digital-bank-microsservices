@@ -30,7 +30,7 @@ public class NotificationsController {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    @PostMapping("/notifications/send")
+    @PostMapping("/notifications")
     public ResponseEntity<String> sendEmailNotification(
             @Valid @RequestBody EmailRequest request
     ) throws JsonProcessingException {
