@@ -1,9 +1,0 @@
-version: '3'
-services:
-  notificacoes:
-    restart: always
-    container_name: springboot-notifications
-    build: .
-    command: mnv spring-boot:run
-    ports:
-      - 3002:3002

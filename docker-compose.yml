@@ -1,9 +1,18 @@
+version: '3'
+
 services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "5672:5672"
+      - "15672:15672"
     volumes:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+
+  notifications-api:
+    build: Notificacoes/notifications-api
+    ports:
+      - "3002:3002"
+    depends_on:
+      - rabbitmq
