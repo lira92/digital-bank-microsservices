@@ -40,9 +40,9 @@ curl --request POST \
   --data '{
       "user_id": 1,
       "goal_name": "name",
-      "goal_amount": 1000.50,
-      "limit_date": "2024-01-30",
-      "discount_date": "2025-05-04" 
+      "target_amount": 1000.50,
+      "target_date": "2024-01-30",
+      "deduction_date": "2025-05-04" 
   }'
 ```
 
