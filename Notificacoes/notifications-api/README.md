@@ -7,8 +7,21 @@ Esta é a API de Notificações, que permite o envio de notificações por email
 - **URL:** `/notifications`
 - **Método:** `POST`
 
-## Como Usar
-Para usar esta API, envie uma requisição HTTP POST para o endpoint acima com as seguintes informações obrigatórias no payload:
+## Como Rodar
+> Esse projeto conta com um Docker para rodar. Nesse caso, cerifique-se da instalação correta dele.
+
+Inicialmente, entre através de um terminal na pasta raiz do projeto de microsserviços, caso já não esteja nela.
+
+Em seguida, rode o comando:
+```
+docker compose up
+```
+Isso levantará o contêiner do rabbitmq e da api de notificações.
+
+Feito isso, o projeto está pronto para ser testado.
+
+## Como Testar
+Para testar esta API, envie uma requisição HTTP POST para o endpoint acima com as seguintes informações obrigatórias no payload:
 
 ### Payload
 ```json
