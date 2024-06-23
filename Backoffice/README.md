@@ -4,6 +4,10 @@
 Se você quer rodar com o modo debug(binding.pry) ativado:
 
 ``` docker compose up -d && docker attach $(docker compose ps -q api) ```
+
+Se não rode apenas:
+
+``` docker compose up ```
 ## Configs
 - Para alterar os endpoints da aplicação, basta modificar o arquivo config/application.yml.
 - Todos os endpoints externos foram feitos nesse projeto, afim de utilizar como testes para testar o funcionamento da requisição, então para ter o uso completo será necessário alterar o endpoint do application.yml.
