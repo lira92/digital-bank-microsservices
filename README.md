@@ -38,11 +38,11 @@ curl --request POST \
   --url /goals \
   --header 'Content-Type: application/json' \
   --data '{
-      "user_id": 1,
+      "account_id": 1,
       "goal_name": "name",
-      "target_amount": 1000.50,
+      "target_value": 1000.50,
       "target_date": "2024-01-30",
-      "deduction_date": "2025-05-04" 
+      "deduction_date": 15 
   }'
 ```
 
