@@ -1,9 +1,11 @@
+from datetime import datetime
+import time
 from fastapi.responses import JSONResponse
-from typing import Union
+from typing import List, Union
 
 from fastapi import FastAPI
 
-from models.payment import Payment
+from models.payment import Payment, ScheduledPayment, ScheduledPaymentStatus
 import requests
 
 
@@ -112,8 +114,8 @@ def transferir(payment: Payment):
     
     Args:
    - valor (float): Valor da transferência.
-   - numero_conta (int): Número da conta do rementente.
-   - numero_conta (int): Número da conta do recebedor.
+   - sender (int): Número da conta do rementente.
+   - receiver (int): Número da conta do recebedor.
 
     
     Returns:
@@ -126,10 +128,9 @@ def transferir(payment: Payment):
     
     try:
         if(obter_conta(payment.sender) is None):
-            return JSONResponse(status_code=400, content={"message": "Conta de remetente inexistente"})
+           return JSONResponse(status_code=400, content={"message": "Conta de remetente inexistente"})
         if(obter_conta(payment.receiver) is None):
-            return JSONResponse(status_code=400, content={"message": "Conta de recebedor inexistente"})
-      
+            return JSONResponse(status_code=400, content={"message": "Conta de recebedor inexistente"})      
         if obter_saldo(payment.sender) < payment.value:
             return JSONResponse(status_code=400, content={"message": "Saldo do remetente insuficiente"})
       
@@ -187,3 +188,96 @@ def pagar_boleto(boleto: str, numero_conta: int):
     return JSONResponse(status_code=200, content={"mensagem": "Débito realizado com sucesso", "valor pago": formatar_valor(valor), "novo saldo": formatar_valor(obter_saldo(numero_conta))})
 
 
+# Lista em memória para armazenar os agendamentos
+agendamentos: List[ScheduledPaymentStatus] = []
+
+def is_valid_date(date_string):
+    try:
+        datetime.strptime(date_string, "%Y-%m-%d")       
+        return  True
+    except ValueError:
+        return  False
+@app.post("/agendar-transferencia")
+def agendar_transferencia(pagamentomodel: ScheduledPayment):
+    """
+    Endpoint para agendar uma transferencia.
+    
+    Args:
+    - valor (float): Valor da transferência.
+    - sender (int): Número da conta do rementente.
+    - receiver (int): Número da conta do recebedor
+    - data_agendamento (date): Data de agendamento.
+    - descricao (str): Descricão do agendamento.
+    Returns:
+    - JSONResponse: Resposta com o resultado do débito.
+    """
+    pagamento = ScheduledPaymentStatus(
+        data_agendamento=pagamentomodel.data_agendamento,
+        value=pagamentomodel.value,
+        sender=pagamentomodel.sender,
+        receiver=pagamentomodel.receiver,
+        descricao=pagamentomodel.descricao,
+        realizado = False
+    )
+    try:
+        if not is_valid_date(str(pagamento.data_agendamento)):
+            return  JSONResponse(status_code=400, content="Data de agendamento inválida")
+        
+        if(obter_conta(pagamento.sender) is None):
+            return  JSONResponse(status_code=400, content={"message": "Conta de rementente inexistente"})
+        
+        if(obter_conta(pagamento.receiver) is None):
+            print('bateu 2')    
+            return  JSONResponse(status_code=400, content={"message": "Conta de recebedor inexistente"})
+               
+        if obter_saldo(pagamento.sender) < pagamento.value:
+            print('bateu 3')            
+            return  JSONResponse(status_code=400, content={"message": "Transferência agendada, certifique-se de ter saldo suficiente na data de pagamento."})
+        
+        if pagamento.data_agendamento < datetime.now().date():
+            return  JSONResponse(status_code=400, content={"message": "A data de agendamento deve ser no futuro"})
+          
+    except ValueError as e:
+        return JSONResponse(status_code=400, content={"message": str(e)})
+    except ConnectionError as e:
+        return JSONResponse(status_code=500, content={"message": str(e)})
+    except RuntimeError as e:
+        return JSONResponse(status_code=500, content={"message": str(e)})
+
+    agendamentos.append(pagamento)
+    return  {"mensagem": "Pagamento agendado com sucesso", 
+             "Data": str(pagamento.data_agendamento), 
+             "Valor": formatar_valor(pagamento.value),
+             "Descricão": pagamento.descricao,
+             "Situação": "Agendado" if not pagamento.realizado else "Realizado"}
+
+@app.get("/agendamentos")
+def agendamentos():
+    agendamentos_formatados = []
+    for pagamento in agendamentos:
+        agendamentos_formatados.append({
+            "Data": str(pagamento.data_agendamento), 
+            "Valor": formatar_valor(pagamento.value),
+            "Descrição": pagamento.descricao,
+            "Situação": "Agendado" if not pagamento.realizado else "Realizado"
+        })
+    return agendamentos_formatados
+
+
+# Verificar isso depois
+def verificar_pagamentos_agendados():
+    while True:
+        agora = datetime.now().date()
+        for pagamento in agendamentos:
+            if pagamento.data_agendamento <= agora and not pagamento.realizado:
+                try:
+                    debitar_valor(pagamento.sender, pagamento.value)
+                    creditar_valor(pagamento.receiver, pagamento.value)
+                    pagamento.realizado = True
+                    print(f"Pagamento agendado realizado: {pagamento.sender} -> {pagamento.receiver}, valor: {pagamento.value}")
+                except Exception as e:
+                    print(f"Erro ao realizar pagamento agendado para a conta {pagamento.sender}: {str(e)}")
+        print("Verificando pagamentos agendados")
+        time.sleep(10)
+
+    
