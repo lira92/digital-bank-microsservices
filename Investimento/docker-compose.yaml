@@ -27,7 +27,6 @@ services:
     restart: always
     ports:
       - 8080:8080
-    command: mvn spring-boot:run
     depends_on:
       db-investiment:
         condition: service_healthy
