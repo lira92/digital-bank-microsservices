@@ -4,12 +4,17 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
@@ -17,6 +22,7 @@ import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder.Secret
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import br.com.biopark.controllers.ContaController;
 import br.com.biopark.dtos.MovimentacaoDTO;
@@ -36,6 +42,8 @@ public class ContaService {
 	ContaRepository repository;
 	@Autowired
 	MovimentacaoRepository movimentacaoRepository;
+	@Autowired
+	private RestTemplate restTemplate;
 	
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public List<ContaVO> findAll(Integer page){
@@ -123,7 +131,17 @@ public class ContaService {
 		Conta conta = repository.findByNumero(movimentacao.getNumero());
 		if (conta.isStatus() == false) throw new MinhaException("Não é possível debitar pois conta está inativa!");
 		if (movimentacao.getValor() > conta.getSaldo()) {
-			// envio do email
+			String url = "http://localhost:3002/notifications";
+			HttpHeaders headers = new HttpHeaders();
+		    headers.setContentType(MediaType.APPLICATION_JSON);
+		    Map<String, Object> requestBody = new HashMap<>();
+		    List<String> recipients = new ArrayList<>();
+		    recipients.add(conta.getEmail());
+	        requestBody.put("messageRecipients", recipients);
+	        requestBody.put("messageSubject", "Não foi possível realizar o pagamento de R$ " + movimentacao.getValor());
+	        requestBody.put("messageBody", "Não foi possível realizar o seu pagamento de R$ " + movimentacao.getValor() + " por saldo insuficiente. Adicione mais dinheiro em sua conta e tente novamente!");
+	        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+	        restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
 			throw new MinhaException("Valor excede o saldo da conta! Email foi enviado ao dono.");
 		}
 		conta.setSaldo(conta.getSaldo() - movimentacao.getValor());
