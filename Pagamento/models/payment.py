@@ -15,3 +15,13 @@ class ScheduledPayment(Payment):
     
 class ScheduledPaymentStatus(ScheduledPayment):
     realizado : bool = False
+
+class Boleto(BaseModel):
+    boleto: str
+    numero_conta: int
+
+class ScheduledBoleto(Boleto):
+    valor : float
+    realizado : bool = False
+    data_agendamento : date
+    descricao : str
