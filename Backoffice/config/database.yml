@@ -1,0 +1,29 @@
+
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  username: postgres
+  password: Dev!123
+  host: postgres
+  port: 5432
+
+development:
+  <<: *default
+  database: backoffice_development
+  username: postgres
+  password: Dev!123
+  host: postgres
+  port: 5432
+
+
+
+test:
+  <<: *default
+  database: backoffice_test
+
+production:
+  <<: *default
+  database: backoffice_production
+  username: backoffice
+  password: <%= ENV["BACKOFFICE_DATABASE_PASSWORD"] %>
