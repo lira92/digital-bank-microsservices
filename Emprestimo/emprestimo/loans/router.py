@@ -15,6 +15,7 @@ from loans.schemas import (
     LoanValidateRequestSchema, LoanValidateResponseSchema,
 )
 from loans.tasks import send_loan
+from services.configurations import ConfigurationClient
 
 
 router = APIRouter()
@@ -25,11 +26,19 @@ async def get_loans(
     request: LoanListRequestSchema = LoanListRequestSchema(),
     database: Session = Depends(Database),
 ):
+    configuration_client = ConfigurationClient()
+    configurations = await configuration_client.get_current_configurations()
+    if (
+        request.portions < configurations['minimo_parcelamento']
+        or request.portions > configurations['maximo_parcelamento']
+    ):
+        raise ValueError('Número inválido de parcelas')
+
     loans = database.query(Loan)
-    loans = loans.filter(
-        Loan.status==request.status,
-        Loan.account_number==request.numero_conta,
-    )
+    if request.status:
+        loans = loans.filter(Loan.status==request.status)
+    if request.numero_conta:
+        loans = loans.filter(Loan.account_number==request.numero_conta)
     loans = loans.order_by(Loan.created_at.desc())
 
     return {

@@ -4,12 +4,12 @@ from enum import Enum
 
 
 class LoanStatus(Enum):
-    PENDING = 'PENDENTE'
-    APPROVED = 'APROVADO'
-    DISAPPROVED = 'REPROVADO'
+    PENDING = 'pendente'
+    APPROVED = 'aprovado'
+    DISAPPROVED = 'reprovado'
 
 
 class PortionStatus(Enum):
-    PENDING = 'PENDENTE'
-    PAID = 'PAGO'
-    EXPIRED = 'VENCIDO'
+    PENDING = 'pendente'
+    PAID = 'pago'
+    EXPIRED = 'vencido'
