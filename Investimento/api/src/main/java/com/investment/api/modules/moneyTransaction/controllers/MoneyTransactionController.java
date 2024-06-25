@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.investment.api.modules.moneyTransaction.forms.TransactionForm;
+import com.investment.api.modules.moneyTransaction.services.ContributeService;
 import com.investment.api.modules.moneyTransaction.services.RedeemService;
 
 import jakarta.validation.Valid;
@@ -18,9 +19,11 @@ import jakarta.validation.Valid;
 public class MoneyTransactionController {
     
     private final RedeemService redeemService;
+    private final ContributeService contributeService;
 
-    public MoneyTransactionController(RedeemService redeemService) {
+    public MoneyTransactionController(RedeemService redeemService, ContributeService contributeService) {
         this.redeemService = redeemService;
+        this.contributeService = contributeService;
     }
 
     @PostMapping("/redeem")
@@ -31,6 +34,7 @@ public class MoneyTransactionController {
 
     @PostMapping("/contribute")
     public ResponseEntity<Void> financialSupport(@Valid @RequestBody TransactionForm transactionForm){
+        this.contributeService.contribute(transactionForm);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

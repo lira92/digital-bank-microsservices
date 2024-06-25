@@ -2,7 +2,8 @@ package com.investment.api.modules.moneyTransaction.enums;
 
 public enum TransferType {
     DEDUCTION_INVEST("aporte - investimento"),
-    CREDIT_INVEST("resgate - investimento");
+    CREDIT_INVEST("resgate - investimento"),
+    AUTOMATIC_DEDUCTION("aporte automático");
 
     private final String value;
 

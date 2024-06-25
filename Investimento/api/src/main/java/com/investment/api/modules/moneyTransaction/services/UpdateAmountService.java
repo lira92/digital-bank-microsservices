@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import com.investment.api.modules.goal.entities.Goal;
 import com.investment.api.modules.goal.repositories.GoalRepository;
 import com.investment.api.modules.moneyTransaction.entities.TransactionHistory;
-import com.investment.api.modules.moneyTransaction.enums.Action;
 import com.investment.api.modules.moneyTransaction.repositories.TransactionHistoryRepository;
 
 import jakarta.transaction.Transactional;
@@ -24,12 +23,7 @@ public class UpdateAmountService {
 
     @Transactional
     public void updateAmount(Goal goal, TransactionHistory transactionHistory) {
-        if (transactionHistory.getAction() == Action.REDEEM) {
-            goal.updateAmount(transactionHistory.getAmount() * -1);
-        } else {
-            goal.updateAmount(transactionHistory.getAmount());
-        }
-
+        goal.updateAmount(transactionHistory.getAmount());
         this.goalRepository.save(goal);
         this.transactionHistoryRepository.save(transactionHistory);
     }

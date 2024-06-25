@@ -55,6 +55,10 @@ public class TransactionHistory {
         this.action = action;
         this.amount = amount;
         this.goal = goal;
+
+        if (action == Action.REDEEM) {
+            this.amount *= -1;
+        }
     }
 
     public TransactionHistory(Long id, ActionType actionType, Action action, float amount, Goal goal) {
