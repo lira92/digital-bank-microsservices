@@ -11,18 +11,15 @@ class EmprestimosController < ApplicationController
   end
 
   def enviar_resultado_validacao
-    EnviarAprovacaoOuReprovacaoService.new(resultado_validacao_params).call
+    requisicao = EnviarAprovacaoOuReprovacaoService.new(resultado_validacao_params).call
+    render json: {}, status: requisicao.status
+  end
 
+  def teste_validar_emprestimo
     render json: {}, status: 200
   end
 
-  private
-
-  def validar_emprestimo
-    render json: params, status: 200
-  end
-
-  def emprestimos
+  def teste_emprestimos
     emprestimos = [
       {
         emprestimo: 15,
@@ -45,6 +42,10 @@ class EmprestimosController < ApplicationController
     ]
     render json: emprestimos, status: 200
   end
+
+  private
+
+
 
   def resultado_validacao_params
     params.permit(:id, :new_status)

@@ -1,7 +1,7 @@
 class EnviarAprovacaoOuReprovacaoService
-  def initialize(id, new_status)
-    @id = id
-    @new_status = new_status.to_s.downcase == 'aprovado'
+  def initialize(params)
+    @id = params['id']
+    @new_status = params['new_status'].to_s.downcase == 'aprovado'
   end
 
   def call
