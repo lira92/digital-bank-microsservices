@@ -1,5 +1,6 @@
 from datetime import datetime
 import time
+import json
 from fastapi.responses import JSONResponse
 from typing import List, Union
 
@@ -35,7 +36,7 @@ def enviar_notificacao_agendamento(conta, sender: int, value: float, data_agenda
 #ver como passar o email ou direto a conta e pegar o email aqui dentro
 def enviar_notificacao_debito(recipient, conta: int, value: float):
     notification_payload = {
-        "messageRecipients": [recipient],
+        "messageRecipients": [recipient.json()['email']],
         "messageSubject": "Transferência Realizada",
         "messageBody": f"<p>Um débito de R${value:.2f} foi realizado em sua conta {conta}.</p>"
     }
@@ -181,6 +182,8 @@ def transferir(payment: Payment):
 
         debitar_valor(payment.sender, payment.value)
         creditar_valor(payment.receiver, payment.value)
+
+        enviar_notificacao_debito(obter_conta(payment.sender), payment.sender, payment.value)
 
     except ValueError as e:
         return JSONResponse(status_code=400, content={"message": str(e)})
