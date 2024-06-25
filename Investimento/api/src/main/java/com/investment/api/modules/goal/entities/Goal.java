@@ -48,7 +48,7 @@ public class Goal {
 
     @NotNull(message = "Valor atual não pode estar vazio")
     @Column(nullable = false)
-    private double currentValue = 0.0f;
+    private double currentValue = 0.0000f;
 
     @NotNull(message = "Valor do objetivo não pode estar vazio")
     @Column(nullable = false)
