@@ -24,8 +24,7 @@ public class GetRateService {
         ResponseDto response = this.apiService.get(url);
 
         if (response.statusCode().is2xxSuccessful()) {
-        return
-        this.convertToDailyRate(Float.parseFloat(response.body().get("juros").toString()));
+            return this.convertToDailyRate(Float.parseFloat(response.body().get("juros").toString()));
         }
 
         throw new ExternalApiException(500, "Error while requesting back office API:" + response.body());

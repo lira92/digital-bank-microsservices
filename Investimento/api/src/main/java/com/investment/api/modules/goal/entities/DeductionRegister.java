@@ -22,6 +22,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "deduction_registers")
@@ -43,22 +44,31 @@ public class DeductionRegister {
     @NotNull(message = "Status não pode estar vazio")
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Setter
     private DeductionStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "goal_id")
     private Goal goal;
 
-    public DeductionRegister(Long id, LocalDate deductionDate, DeductionStatus status, Goal goal) {
+    @Column(nullable = false)
+    private boolean deleted = false;
+
+    public DeductionRegister(Long id, LocalDate deductionDate, DeductionStatus status, Goal goal, boolean deleted) {
         this.id = id;
         this.deductionDate = deductionDate;
         this.status = status;
         this.goal = goal;
+        this.deleted = deleted;
     }
 
     public DeductionRegister(LocalDate deductionDate, Goal goal) {
         this.deductionDate = deductionDate;
         this.status = DeductionStatus.SCHEDULED;
         this.goal = goal;
+    }
+
+    public DeductionRegister() {
+        
     }
 }
