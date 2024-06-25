@@ -8,7 +8,7 @@ class OnboardingController < ApplicationController
   end
 
   def prospect
-     prospect = [ 
+     prospect = [
       {
         cpf: '5665656873337',
         status: false
@@ -18,9 +18,9 @@ class OnboardingController < ApplicationController
         status: false
       },
       {
-        cpf: '5465838236326',    
+        cpf: '5465838236326',
         status: false
-      }  
+      }
     ]
     render json: prospect, status: 200
   end
