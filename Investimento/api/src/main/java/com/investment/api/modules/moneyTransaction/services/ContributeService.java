@@ -48,7 +48,7 @@ public class ContributeService {
         try {
             transactionSuccess = this.tranferMoney(transactionForm.amount(), goal.getAccountNumber());
         } catch (ExternalApiException error) {
-            if (error.getResponseBody().contains("Valor excede o saldo da conta! Email foi enviado ao dono.")) {
+            if ((error.getResponseBody() != null)&&(error.getResponseBody().contains("Valor excede o saldo da conta! Email foi enviado ao dono."))) {
                 throw new NoCashException();
             }
 

@@ -45,7 +45,7 @@ public class CreateGoalService {
             response = this.apiService.get(url);
         } catch (ExternalApiException error) {
             // Pequena gambiarra porque a API de conta retorna 400 para tudo que não está ok
-            if (error.getResponseBody().contains("Conta não encontrada!")) {
+            if ((error.getResponseBody() != null)&&(error.getResponseBody().contains("Conta não encontrada!"))) {
                 throw new HttpException(HttpStatus.NOT_FOUND, "Conta informada não existente");
             }
 
