@@ -23,21 +23,30 @@ public class ContributeService {
     private final UpdateAmountService updateAmountService;
     private final GoalRepository goalRepository;
 
+    private TransferType transferType;
+    private ActionType actionType;
+
     public ContributeService(ApiService apiService, UpdateAmountService updateAmountService,
             GoalRepository goalRepository) {
         this.apiService = apiService;
         this.updateAmountService = updateAmountService;
         this.goalRepository = goalRepository;
+        this.transferType = TransferType.DEDUCTION_INVEST;
+        this.actionType = ActionType.MANUAL;
     }
 
-    public void contribute(TransactionForm transactionForm) {
+    public void contribute(TransactionForm transactionForm, ActionType actionType) {
         Goal goal = this.goalRepository.findById(transactionForm.goalId()).orElseThrow();
+
+        if (ActionType.AUTOMATIC.equals(actionType)) {
+            this.transferType = TransferType.AUTOMATIC_DEDUCTION;
+            this.actionType = actionType;
+        }
 
         boolean transactionSuccess = false;
 
         try {
-            transactionSuccess = this.tranferMoney(transactionForm.amount(), goal.getAccountNumber(),
-                    TransferType.DEDUCTION_INVEST);
+            transactionSuccess = this.tranferMoney(transactionForm.amount(), goal.getAccountNumber());
         } catch (ExternalApiException error) {
             if (error.getResponseBody().contains("Valor excede o saldo da conta! Email foi enviado ao dono.")) {
                 throw new NoCashException();
@@ -48,20 +57,20 @@ public class ContributeService {
 
         if (transactionSuccess) {
             this.updateAmountService.updateAmount(goal,
-                    this.createTransactionHistory(goal, transactionForm.amount(), ActionType.MANUAL));
+                    this.createTransactionHistory(goal, transactionForm.amount()));
         }
     }
 
-    private TransactionHistory createTransactionHistory(Goal goal, float amount, ActionType actionType) {
+    private TransactionHistory createTransactionHistory(Goal goal, float amount) {
         return new TransactionHistory(
-                actionType,
+                this.actionType,
                 Action.CONTRIBUTE,
                 amount,
                 goal);
     }
 
-    private boolean tranferMoney(float amount, Long accountNumber, TransferType transferType) {
-        TransactionDto transactionDto = new TransactionDto(transferType.getValue(), amount,
+    private boolean tranferMoney(float amount, Long accountNumber) {
+        TransactionDto transactionDto = new TransactionDto(this.transferType.getValue(), amount,
                 accountNumber);
         String url = UrlEnum.CONTA_CORRENTE.getValue() + "/debitar";
 

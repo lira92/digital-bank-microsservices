@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.investment.api.modules.moneyTransaction.enums.ActionType;
 import com.investment.api.modules.moneyTransaction.forms.TransactionForm;
 import com.investment.api.modules.moneyTransaction.services.ContributeService;
 import com.investment.api.modules.moneyTransaction.services.RedeemService;
@@ -34,7 +35,7 @@ public class MoneyTransactionController {
 
     @PostMapping("/contribute")
     public ResponseEntity<Void> financialSupport(@Valid @RequestBody TransactionForm transactionForm){
-        this.contributeService.contribute(transactionForm);
+        this.contributeService.contribute(transactionForm, ActionType.MANUAL);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
