@@ -1,5 +1,6 @@
 from datetime import datetime
 import time
+import json
 from fastapi.responses import JSONResponse
 from typing import List, Union
 
@@ -10,7 +11,7 @@ import requests
 
 
 CONTA_CORRENTE_BASE_URL = "http://contacorrente:3003/api/"
-URL_NOTIFICACAO = "http://localhost:3002/"
+URL_NOTIFICACAO = "http://notifications-api:3002/notifications"
 
 numero_boleto = "34191.79001 01043.510047 91020.150008 1 97450026000"
 
@@ -27,7 +28,7 @@ def enviar_notificacao_agendamento(conta, sender: int, value: float, data_agenda
         "messageBody": f"<p>Um pagamento de R${value:.2f} foi agendado por {sender} em {data_agendamento}.</p>"
     }
     try:
-        response = requests.post(URL_NOTIFICACAO, json=notification_payload)
+        response = requests.post(URL_NOTIFICACAO, json=json.dumps(notification_payload))
         response.raise_for_status()
         print("Notificação de agendamento enviada com sucesso")
     except requests.exceptions.RequestException as e:
@@ -35,11 +36,12 @@ def enviar_notificacao_agendamento(conta, sender: int, value: float, data_agenda
 #ver como passar o email ou direto a conta e pegar o email aqui dentro
 def enviar_notificacao_debito(recipient, conta: int, value: float):
     notification_payload = {
-        "messageRecipients": [recipient],
+        "messageRecipients": [recipient.json()['email']],
         "messageSubject": "Transferência Realizada",
         "messageBody": f"<p>Um débito de R${value:.2f} foi realizado em sua conta {conta}.</p>"
     }
     try:
+        print(URL_NOTIFICACAO)
         response = requests.post(URL_NOTIFICACAO, json=notification_payload)
         response.raise_for_status()
         print("Notificação de débito enviada com sucesso")
@@ -181,6 +183,8 @@ def transferir(payment: Payment):
 
         debitar_valor(payment.sender, payment.value)
         creditar_valor(payment.receiver, payment.value)
+
+        enviar_notificacao_debito(obter_conta(payment.sender), payment.sender, payment.value)
 
     except ValueError as e:
         return JSONResponse(status_code=400, content={"message": str(e)})
