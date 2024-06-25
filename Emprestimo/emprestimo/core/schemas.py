@@ -1,6 +1,5 @@
 """Base Pydantic schemas for Emprestimo microservice."""
 
-from typing import Optional, Dict
 from pydantic import BaseModel
 
 
