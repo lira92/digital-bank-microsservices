@@ -10,13 +10,56 @@ import requests
 
 
 BASE_URL = "http://192.168.1.110:3003/api/"
+URL_NOTIFICACAO = "http://localhost:3002/"
 
 numero_boleto = "34191.79001 01043.510047 91020.150008 1 97450026000"
 
 app = FastAPI()
 
-def notificar_acao(acao: str) -> None:
-    pass
+import requests
+
+#TODO adicionar nas funções de debitar, creditar e de agendamento a chamada da função de notificação
+#ver como passar o email ou direto a conta e pegar o email aqui dentro
+def enviar_notificacao_agendamento(email: str, sender: int, receiver: int, value: float, data_agendamento: str):
+    notification_payload = {
+        "messageRecipients": [email],
+        "messageSubject": "Pagamento Agendado",
+        "messageBody": f"<p>Um pagamento de R${value:.2f} foi agendado de {sender} para {receiver} em {data_agendamento}.</p>"
+    }
+    try:
+        response = requests.post(URL_NOTIFICACAO, json=notification_payload)
+        response.raise_for_status()
+        print("Notificação de agendamento enviada com sucesso")
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Erro ao enviar notificação de agendamento: {str(e)}")
+#ver como passar o email ou direto a conta e pegar o email aqui dentro
+def enviar_notificacao_debito(email: str, conta: int, value: float):
+    notification_payload = {
+        "messageRecipients": [email],
+        "messageSubject": "Transferência Realizada",
+        "messageBody": f"<p>Um débito de R${value:.2f} foi realizado em sua conta {conta}.</p>"
+    }
+    try:
+        response = requests.post(URL_NOTIFICACAO, json=notification_payload)
+        response.raise_for_status()
+        print("Notificação de débito enviada com sucesso")
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Erro ao enviar notificação de débito: {str(e)}")
+#ver como passar o email ou direto a conta e pegar o email aqui dentro
+def enviar_notificacao_credito(email: str, conta: int, value: float):
+    notification_payload = {
+        "messageRecipients": [email],
+        "messageSubject": "Crédito Realizado",
+        "messageBody": f"<p>Uma transferência de R${value:.2f} foi realizada em sua conta {conta}.</p>"
+    }
+    try:
+        response = requests.post(URL_NOTIFICACAO, json=notification_payload)
+        response.raise_for_status()
+        print("Notificação de crédito enviada com sucesso")
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Erro ao enviar notificação de crédito: {str(e)}")
+
+
 def debitar_valor(numero_conta: int, valor: float) -> None:
     try:
         response = requests.patch(
@@ -305,12 +348,15 @@ def agendar_boleto(boleto: ScheduledBoleto):
         return JSONResponse(status_code=400, content={"erro": str(e)})
     if( boletoagendado.value == 0):
         return JSONResponse(status_code=400, content={"erro": "Boleto inválido"})
+    conta = obter_conta(boletoagendado.sender)
     
-    if(obter_conta(boletoagendado.sender) is None):
+    if(conta is None):
         return  JSONResponse(status_code=400, content={"message": "Conta inexistente"})
     
-
+    conta.json()
     agendamentosboleto.append(boletoagendado)
+    print(conta.get("email"))
+    # enviar_notificacao_agendamento(conta.email, boletoagendado.sender, boletoagendado.receiver, boletoagendado.value, str(boletoagendado.data_agendamento))
     if(boletoagendado.value > obter_saldo(boletoagendado.sender)):
             return {
                 "Mensagem": "Boleto agendado com sucesso, certifique-se de ter saldo suficiente na data de pagamento.",
