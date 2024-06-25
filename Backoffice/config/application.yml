@@ -1,5 +1,7 @@
 production:
   api_emprestimo: 'http://localhost:3000'
+  api_onboarding: 'http://localhost:3000'
 
 development:
   api_emprestimo: 'http://localhost:3000'
+  api_onboarding: 'http://localhost:3000'
