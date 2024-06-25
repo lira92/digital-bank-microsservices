@@ -9,7 +9,7 @@ from models.payment import Boleto, Payment, ScheduledBoleto, ScheduledBoletoStat
 import requests
 
 
-BASE_URL = "http://192.168.1.110:3003/api/"
+BASE_URL = "http://172.18.113.235:3003/api/"
 URL_NOTIFICACAO = "http://localhost:3002/"
 
 numero_boleto = "34191.79001 01043.510047 91020.150008 1 97450026000"
@@ -20,11 +20,11 @@ import requests
 
 #TODO adicionar nas funções de debitar, creditar e de agendamento a chamada da função de notificação
 #ver como passar o email ou direto a conta e pegar o email aqui dentro
-def enviar_notificacao_agendamento(email: str, sender: int, receiver: int, value: float, data_agendamento: str):
+def enviar_notificacao_agendamento(conta, sender: int, value: float, data_agendamento: str):
     notification_payload = {
-        "messageRecipients": [email],
+        "messageRecipients": [conta.json()['email']],
         "messageSubject": "Pagamento Agendado",
-        "messageBody": f"<p>Um pagamento de R${value:.2f} foi agendado de {sender} para {receiver} em {data_agendamento}.</p>"
+        "messageBody": f"<p>Um pagamento de R${value:.2f} foi agendado por {sender} em {data_agendamento}.</p>"
     }
     try:
         response = requests.post(URL_NOTIFICACAO, json=notification_payload)
@@ -33,9 +33,9 @@ def enviar_notificacao_agendamento(email: str, sender: int, receiver: int, value
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"Erro ao enviar notificação de agendamento: {str(e)}")
 #ver como passar o email ou direto a conta e pegar o email aqui dentro
-def enviar_notificacao_debito(email: str, conta: int, value: float):
+def enviar_notificacao_debito(recipient, conta: int, value: float):
     notification_payload = {
-        "messageRecipients": [email],
+        "messageRecipients": [recipient],
         "messageSubject": "Transferência Realizada",
         "messageBody": f"<p>Um débito de R${value:.2f} foi realizado em sua conta {conta}.</p>"
     }
@@ -46,9 +46,9 @@ def enviar_notificacao_debito(email: str, conta: int, value: float):
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"Erro ao enviar notificação de débito: {str(e)}")
 #ver como passar o email ou direto a conta e pegar o email aqui dentro
-def enviar_notificacao_credito(email: str, conta: int, value: float):
+def enviar_notificacao_credito(recipient, conta: int, value: float):
     notification_payload = {
-        "messageRecipients": [email],
+        "messageRecipients": [recipient.email],
         "messageSubject": "Crédito Realizado",
         "messageBody": f"<p>Uma transferência de R${value:.2f} foi realizada em sua conta {conta}.</p>"
     }
@@ -73,7 +73,7 @@ def debitar_valor(numero_conta: int, valor: float) -> None:
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"Erro ao realizar débito: {str(e)}")
-    
+
 def creditar_valor(numero_conta: int, valor: float) -> None:
     try:
         response = requests.patch(
@@ -95,7 +95,7 @@ def decode_boleto(boleto: str) -> float:
     valor_str = boleto[-10:]
     try:
        valor = float(valor_str[:-2] + '.' + valor_str[-2:])
-    #    print("valor" + valor_str)    
+    #    print("valor" + valor_str)
     except ValueError:
         raise ValueError("Formato de boleto inválido")
     return valor
@@ -107,12 +107,12 @@ def obter_saldo(numero_conta: int) -> float:
         raise ConnectionError("Não foi possível conectar ao serviço da conta")
     except requests.exceptions.RequestException as e:
         raise JSONResponse(f"Erro ao consultar saldo: {str(e)}")
-    
+
     if response.status_code == 400:
         raise ValueError("Conta inexistente")
     if response.status_code != 200:
         raise JSONResponse("Erro ao consultar saldo")
-    
+
     try:
         saldo = response.json()
         if saldo is None:
@@ -121,30 +121,30 @@ def obter_saldo(numero_conta: int) -> float:
         try:
             saldo = float(response.text)
         except ValueError:
-            raise JSONResponse("Resposta inválida do serviço de saldo")    
+            raise JSONResponse("Resposta inválida do serviço de saldo")
     return saldo
 
 def obter_conta(numero_conta: int):
     try:
         response = requests.get(f"{BASE_URL}conta/numero/{numero_conta}")
-    
+
     except requests.exceptions.ConnectionError:
         raise ConnectionError("Não foi possível conectar ao serviço da conta")
     except requests.exceptions.RequestException as e:
         raise JSONResponse(f"Erro ao consultar conta: {str(e)}")
-    
+
     if response.status_code == 400:
-        return 
-    
+        return
+
     return response
 
 def formatar_valor(valor: float) -> str:
     """
     Formata um valor float como moeda brasileira.
-    
+
     Args:
     - valor (float): Valor a ser formatado.
-    
+
     Returns:
     - str: Valor formatado como moeda brasileira.
     """
@@ -154,13 +154,13 @@ def formatar_valor(valor: float) -> str:
 def transferir(payment: Payment):
     """
     Endpoint para transferir saldo de uma conta para outra.
-    
+
     Args:
    - valor (float): Valor da transferência.
    - sender (int): Número da conta do rementente.
    - receiver (int): Número da conta do recebedor.
 
-    
+
     Returns:
     - JSONResponse: Resposta com o resultado do débito.
     """
@@ -168,15 +168,17 @@ def transferir(payment: Payment):
         return JSONResponse(status_code=400, content={"message": "Valor da transferência deve ser positivo"})
     if(payment.sender == payment.receiver):
         return JSONResponse(status_code=400, content={"message": "Conta remetente e conta recebedor devem ser diferentes"})
-    
+
+    print(obter_conta(payment.sender).json()['email'])
+
     try:
         if(obter_conta(payment.sender) is None):
            return JSONResponse(status_code=400, content={"message": "Conta de remetente inexistente"})
         if(obter_conta(payment.receiver) is None):
-            return JSONResponse(status_code=400, content={"message": "Conta de recebedor inexistente"})      
+            return JSONResponse(status_code=400, content={"message": "Conta de recebedor inexistente"})
         if obter_saldo(payment.sender) < payment.value:
             return JSONResponse(status_code=400, content={"message": "Saldo do remetente insuficiente"})
-      
+
         debitar_valor(payment.sender, payment.value)
         creditar_valor(payment.receiver, payment.value)
 
@@ -196,11 +198,11 @@ def transferir(payment: Payment):
 def pagar_boleto(boleto: Boleto):
     """
     Endpoint para pagar um boleto na conta especificada.
-    
+
     Args:
     - boleto (str): String do boleto com 47 dígitos.
     - numero_conta (int): Número da conta.
-    
+
     Returns:
     - JSONResponse: Resposta com o resultado do débito.
     """
@@ -218,7 +220,7 @@ def pagar_boleto(boleto: Boleto):
         return JSONResponse(status_code=500, content={"erro": str(e)})
     except RuntimeError as e:
         return JSONResponse(status_code=500, content={"erro": str(e)})
-    
+
     if saldo < valor:
         return JSONResponse(status_code=400, content={"falha": "Saldo insuficiente", "saldo": formatar_valor(saldo), "valor": formatar_valor(valor)})
     if(valor == 0):
@@ -238,16 +240,16 @@ agendamentos: List[ScheduledPaymentStatus] = []
 
 def is_valid_date(date_string):
     try:
-        datetime.strptime(date_string, "%Y-%m-%d")       
+        datetime.strptime(date_string, "%Y-%m-%d")
         return  True
     except ValueError:
         return  False
-    
+
 @app.post("/agendar-transferencia")
 def agendar_transferencia(pagamentomodel: ScheduledPayment):
     """
     Endpoint para agendar uma transferencia.
-    
+
     Args:
     - valor (float): Valor da transferência.
     - sender (int): Número da conta do rementente.
@@ -269,18 +271,18 @@ def agendar_transferencia(pagamentomodel: ScheduledPayment):
     try:
         if not is_valid_date(str(pagamento.data_agendamento)):
             return  JSONResponse(status_code=400, content={"message": "Data de agendamento inválida"})
-       
+
         if pagamento.data_agendamento < datetime.now().date():
             return  JSONResponse(status_code=400, content={"message": "Data de agendamento precisa ser uma data futura"})
-        
+
         if(obter_conta(pagamento.sender) is None):
             return  JSONResponse(status_code=400, content={"message": "Conta de rementente inexistente"})
-        
+
         if(obter_conta(pagamento.receiver) is None):
-            print('bateu 2')    
+            print('bateu 2')
             return  JSONResponse(status_code=400, content={"message": "Conta de recebedor inexistente"})
-        
-            
+
+
         agendamentos.append(pagamento)
 
         if(pagamento.value > obter_saldo(pagamento.sender)):
@@ -291,14 +293,14 @@ def agendar_transferencia(pagamentomodel: ScheduledPayment):
                 "Descrição": pagamentomodel.descricao,
                 "Situação": "Agendado"
             }
-        else:   
-            return  {"mensagem": "Transferência agendada com sucesso", 
-                    "Data": str(pagamento.data_agendamento), 
+        else:
+            return  {"mensagem": "Transferência agendada com sucesso",
+                    "Data": str(pagamento.data_agendamento),
                     "Valor": formatar_valor(pagamento.value),
                     "Descricão": pagamento.descricao,
                     "Situação": "Agendado" if not pagamento.realizado else "Realizado"}
-           
-          
+
+
     except ValueError as e:
         return JSONResponse(status_code=400, content={"message": str(e)})
     except ConnectionError as e:
@@ -313,7 +315,7 @@ agendamentosboleto: List[ScheduledBoleto] = []
 def agendar_boleto(boleto: ScheduledBoleto):
     """
     Endpoint para agendar pagamento de um boleto.
-    
+
     Args:
     - boleto (str): String do boleto com 47 dígitos.
     - sender (int): Número da conta do rementente.
@@ -321,7 +323,7 @@ def agendar_boleto(boleto: ScheduledBoleto):
     - descricao (str): Descricão do agendamento.
     Returns:
     - JSONResponse: Resposta com o resultado do débito.
-    """    
+    """
 
     boletoagendado = ScheduledBoletoStatus(
         boleto=boleto.boleto,
@@ -330,18 +332,18 @@ def agendar_boleto(boleto: ScheduledBoleto):
         descricao=boleto.descricao,
         value = 0
     )
-    
+
     if not is_valid_date(str(boletoagendado.data_agendamento)):
             return  JSONResponse(status_code=400, content={"erro": "Data de agendamento inválida"})
     if boletoagendado.data_agendamento < datetime.now().date():
             return  JSONResponse(status_code=400, content={"message": "Data de agendamento precisa ser uma data futura"})
-        
+
     try:
         boletoagendado.value = decode_boleto(boleto.boleto)
         print(boletoagendado.value)
     except ValueError as e:
         return JSONResponse(status_code=400, content={"erro": str(e)})
-    
+
     try:
         boletoagendado.value = decode_boleto(boletoagendado.boleto)
     except ValueError as e:
@@ -349,14 +351,13 @@ def agendar_boleto(boleto: ScheduledBoleto):
     if( boletoagendado.value == 0):
         return JSONResponse(status_code=400, content={"erro": "Boleto inválido"})
     conta = obter_conta(boletoagendado.sender)
-    
+
     if(conta is None):
         return  JSONResponse(status_code=400, content={"message": "Conta inexistente"})
-    
+
     conta.json()
     agendamentosboleto.append(boletoagendado)
-    print(conta.get("email"))
-    # enviar_notificacao_agendamento(conta.email, boletoagendado.sender, boletoagendado.receiver, boletoagendado.value, str(boletoagendado.data_agendamento))
+    enviar_notificacao_agendamento(conta, boletoagendado.sender, boletoagendado.value, str(boletoagendado.data_agendamento))
     if(boletoagendado.value > obter_saldo(boletoagendado.sender)):
             return {
                 "Mensagem": "Boleto agendado com sucesso, certifique-se de ter saldo suficiente na data de pagamento.",
@@ -365,20 +366,20 @@ def agendar_boleto(boleto: ScheduledBoleto):
                 "Descrição": boletoagendado.descricao,
                 "Situação": "Agendado"
             }
-    else:   
-            return  {"mensagem": "Boleto agendado com sucesso", 
-                    "Data": str(boletoagendado.data_agendamento), 
+    else:
+            return  {"mensagem": "Boleto agendado com sucesso",
+                    "Data": str(boletoagendado.data_agendamento),
                     "Valor": f"R$ {boletoagendado.value:.2f}",
                     "Descricão": boletoagendado.descricao,
                     "Situação": "Agendado" if not boletoagendado.realizado else "Realizado"}
-   
+
 
 @app.get("/agendamentos")
 def listagem_agendamentos():
     agendamentos_formatados = []
     for pagamento in agendamentos:
         agendamentos_formatados.append({
-            "Data": str(pagamento.data_agendamento), 
+            "Data": str(pagamento.data_agendamento),
             "Valor": formatar_valor(pagamento.value),
             "Descrição": pagamento.descricao,
             "Situação": "Agendado" if not pagamento.realizado else "Pagamento Realizado"
@@ -390,7 +391,7 @@ def listagem_agendamentos_boleto():
     agendamentos_boleto_formatados = []
     for boleto in agendamentosboleto:
         agendamentos_boleto_formatados.append({
-            "Data": str(boleto.data_agendamento), 
+            "Data": str(boleto.data_agendamento),
             "Valor": formatar_valor(boleto.value),
             "Descrição": boleto.descricao,
             "Situação": "Agendado" if not boleto.realizado else "Pagamento Realizado"
@@ -412,5 +413,3 @@ def verificar_pagamentos_agendados():
                     print(f"Erro ao realizar pagamento agendado para a conta {pagamento.sender}: {str(e)}")
         print("Verificando pagamentos agendados")
         time.sleep(10)
-
-    
