@@ -10,6 +10,8 @@ import com.investment.api.modules.moneyTransaction.forms.TransactionForm;
 import com.investment.api.modules.moneyTransaction.enums.ActionType;
 import com.investment.api.modules.moneyTransaction.exceptions.NoCashException;
 import com.investment.api.modules.accrual.services.GetRateService;
+import com.investment.api.modules.mailer.dto.MailDto;
+import com.investment.api.modules.mailer.services.SendMailService;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -23,12 +25,14 @@ public class AutomaticDebitsService {
     private final DeductionRegisterRepository deductionRegisterRepository;
     private final ContributeService contributeService;
     private final GetRateService getRateService;
+    private final SendMailService sendMailService;
 
     public AutomaticDebitsService(DeductionRegisterRepository deductionRegisterRepository,
-            ContributeService contributeService, GetRateService getRateService) {
+            ContributeService contributeService, GetRateService getRateService, SendMailService sendMailService) {
         this.deductionRegisterRepository = deductionRegisterRepository;
         this.contributeService = contributeService;
         this.getRateService = getRateService;
+        this.sendMailService = sendMailService;
     }
 
     @Transactional
@@ -61,10 +65,13 @@ public class AutomaticDebitsService {
         } catch (NoCashException error) {
             deductionRegister.setStatus(DeductionStatus.FAILED);
             this.deductionRegisterRepository.save(deductionRegister);
-            // send mail
+            List<String> to = List.of(deductionRegister.getGoal().getUserEmail());
+            this.sendMailService.sendMail(new MailDto(to, "Débito automático", "Falha ao débito automático, cheque seu saldo por favor"));
         } catch (Exception error) {
             deductionRegister.setStatus(DeductionStatus.FAILED);
             this.deductionRegisterRepository.save(deductionRegister);
+            List<String> to = List.of(deductionRegister.getGoal().getUserEmail());
+            this.sendMailService.sendMail(new MailDto(to, "Débito automático", "Falha ao débito automático"));
         }
     }
 }
