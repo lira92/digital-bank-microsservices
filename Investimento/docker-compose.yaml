@@ -33,10 +33,13 @@ services:
     networks:
       - contacorrente_contacorrente-network
       - database-network-investiment
+      - backoffice_backoffice_network
 
 networks:
   database-network-investiment:
       driver: bridge
   contacorrente_contacorrente-network:
+      external: true
+  backoffice_backoffice_network:
       external: true
   
