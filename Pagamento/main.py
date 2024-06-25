@@ -5,7 +5,7 @@ from typing import List, Union
 
 from fastapi import FastAPI
 
-from models.payment import Boleto, Payment, ScheduledPayment, ScheduledPaymentStatus
+from models.payment import Boleto, Payment, ScheduledBoleto, ScheduledBoletoStatus, ScheduledPayment, ScheduledPaymentStatus
 import requests
 
 
@@ -177,7 +177,9 @@ def pagar_boleto(boleto: Boleto):
         return JSONResponse(status_code=500, content={"erro": str(e)})
     
     if saldo < valor:
-        return JSONResponse(status_code=400, content={"falha": "Saldo insuficiente"})
+        return JSONResponse(status_code=400, content={"falha": "Saldo insuficiente", "saldo": formatar_valor(saldo), "valor": formatar_valor(valor)})
+    if(valor == 0):
+        return JSONResponse(status_code=400, content={"erro": "Boleto inválido"})
     try:
         debitar_valor(boleto.numero_conta, valor)
     except ConnectionError as e:
@@ -185,7 +187,7 @@ def pagar_boleto(boleto: Boleto):
     except RuntimeError as e:
         return JSONResponse(status_code=500, content={"erro": str(e)})
 
-    return JSONResponse(status_code=200, content={"mensagem": "Débito realizado com sucesso", "valor pago": formatar_valor(valor), "novo saldo": formatar_valor(obter_saldo(boleto.numero_conta))})
+    return JSONResponse(status_code=200, content={"mensagem": "Pagamento realizado com sucesso", "valor pago": formatar_valor(valor), "novo saldo": formatar_valor(obter_saldo(boleto.numero_conta))})
 
 
 # Lista em memória para armazenar os agendamentos
@@ -223,7 +225,10 @@ def agendar_transferencia(pagamentomodel: ScheduledPayment):
 
     try:
         if not is_valid_date(str(pagamento.data_agendamento)):
-            return  JSONResponse(status_code=400, content="Data de agendamento inválida")
+            return  JSONResponse(status_code=400, content={"message": "Data de agendamento inválida"})
+       
+        if pagamento.data_agendamento < datetime.now().date():
+            return  JSONResponse(status_code=400, content={"message": "Data de agendamento precisa ser uma data futura"})
         
         if(obter_conta(pagamento.sender) is None):
             return  JSONResponse(status_code=400, content={"message": "Conta de rementente inexistente"})
@@ -231,9 +236,11 @@ def agendar_transferencia(pagamentomodel: ScheduledPayment):
         if(obter_conta(pagamento.receiver) is None):
             print('bateu 2')    
             return  JSONResponse(status_code=400, content={"message": "Conta de recebedor inexistente"})
-               
+        
+            
         agendamentos.append(pagamento)
-        if pagamento.data_agendamento < datetime.now().date():
+
+        if(pagamento.value > obter_saldo(pagamento.sender)):
             return {
                 "Mensagem": "Transferência agendada, certifique-se de ter saldo suficiente na data de pagamento.",
                 "Data": str(pagamentomodel.data_agendamento),
@@ -242,7 +249,7 @@ def agendar_transferencia(pagamentomodel: ScheduledPayment):
                 "Situação": "Agendado"
             }
         else:   
-            return  {"mensagem": "Transferência agendado com sucesso", 
+            return  {"mensagem": "Transferência agendada com sucesso", 
                     "Data": str(pagamento.data_agendamento), 
                     "Valor": formatar_valor(pagamento.value),
                     "Descricão": pagamento.descricao,
@@ -257,10 +264,10 @@ def agendar_transferencia(pagamentomodel: ScheduledPayment):
         return JSONResponse(status_code=500, content={"message": str(e)})
 
 
-agendamentosboleto: List[Boleto] = []
+agendamentosboleto: List[ScheduledBoleto] = []
    #função em andamento
 @app.post("/agendar-boleto")
-def agendar_boleto(boleto: Boleto):
+def agendar_boleto(boleto: ScheduledBoleto):
     """
     Endpoint para agendar pagamento de um boleto.
     
@@ -272,28 +279,53 @@ def agendar_boleto(boleto: Boleto):
     Returns:
     - JSONResponse: Resposta com o resultado do débito.
     """    
+
+    boletoagendado = ScheduledBoletoStatus(
+        boleto=boleto.boleto,
+        sender=boleto.sender,
+        data_agendamento=boleto.data_agendamento,
+        descricao=boleto.descricao,
+        value = 0
+    )
+    
+    if not is_valid_date(str(boletoagendado.data_agendamento)):
+            return  JSONResponse(status_code=400, content={"erro": "Data de agendamento inválida"})
+    if boletoagendado.data_agendamento < datetime.now().date():
+            return  JSONResponse(status_code=400, content={"message": "Data de agendamento precisa ser uma data futura"})
+        
     try:
-        valor = decode_boleto(boleto.boleto)
+        boletoagendado.value = decode_boleto(boleto.boleto)
+        print(boletoagendado.value)
     except ValueError as e:
         return JSONResponse(status_code=400, content={"erro": str(e)})
-
+    
     try:
-        saldo = obter_saldo(boleto.numero_conta)
-
+        boletoagendado.value = decode_boleto(boletoagendado.boleto)
     except ValueError as e:
         return JSONResponse(status_code=400, content={"erro": str(e)})
-    except ConnectionError as e:
-        return JSONResponse(status_code=500, content={"erro": str(e)})
-    except RuntimeError as e:
-        return JSONResponse(status_code=500, content={"erro": str(e)})
+    if( boletoagendado.value == 0):
+        return JSONResponse(status_code=400, content={"erro": "Boleto inválido"})
+    
+    if(obter_conta(boletoagendado.sender) is None):
+        return  JSONResponse(status_code=400, content={"message": "Conta inexistente"})
     
 
-    try:
-        debitar_valor(boleto.numero_conta, valor)
-    except ConnectionError as e:
-        return JSONResponse(status_code=500, content={"erro": str(e)})
-    except RuntimeError as e:
-        return JSONResponse(status_code=500, content={"erro": str(e)})
+    agendamentosboleto.append(boletoagendado)
+    if(boletoagendado.value > obter_saldo(boletoagendado.sender)):
+            return {
+                "Mensagem": "Boleto agendado com sucesso, certifique-se de ter saldo suficiente na data de pagamento.",
+                "Data": str(boletoagendado.data_agendamento),
+                "Valor": f"R$ {boletoagendado.value:.2f}",
+                "Descrição": boletoagendado.descricao,
+                "Situação": "Agendado"
+            }
+    else:   
+            return  {"mensagem": "Boleto agendado com sucesso", 
+                    "Data": str(boletoagendado.data_agendamento), 
+                    "Valor": f"R$ {boletoagendado.value:.2f}",
+                    "Descricão": boletoagendado.descricao,
+                    "Situação": "Agendado" if not boletoagendado.realizado else "Realizado"}
+   
 
 @app.get("/agendamentos")
 def listagem_agendamentos():
