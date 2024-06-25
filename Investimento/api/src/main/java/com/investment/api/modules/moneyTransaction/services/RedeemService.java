@@ -57,7 +57,6 @@ public class RedeemService {
         ResponseDto responseDto = this.apiService.patch(url, transactionDto);
 
         if (!responseDto.statusCode().is2xxSuccessful()) {
-            System.out.println("erro status: " + responseDto.statusCode().value());
             throw new ExternalApiException(responseDto.statusCode().value(), "Erro ao transferir dinheiro - falha de comunicação com o serviço");
         }
 

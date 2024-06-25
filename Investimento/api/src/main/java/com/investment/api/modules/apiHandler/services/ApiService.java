@@ -41,8 +41,6 @@ public class ApiService {
             requestSpec.bodyValue(body);
         }
 
-        System.out.println(body);
-
         try {
             ResponseEntity<String> response = requestSpec.retrieve()
                                              .toEntity(String.class)
@@ -51,7 +49,6 @@ public class ApiService {
         } catch (IOException e) {
             throw new ExternalApiException(500, "Error while parsing response: " + e.getMessage());
         } catch (WebClientResponseException e) {
-            System.out.println("erro: " + e.getMessage());
             throw new ExternalApiException(500, "Error while requesting external API: " + e.getMessage());
         }
     }
