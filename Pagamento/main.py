@@ -212,7 +212,7 @@ def pagar_boleto(boleto: Boleto):
         return JSONResponse(status_code=400, content={"erro": str(e)})
 
     try:
-        saldo = obter_saldo(boleto.numero_conta)
+        saldo = obter_saldo(boleto.sender)
 
     except ValueError as e:
         return JSONResponse(status_code=400, content={"erro": str(e)})
@@ -226,7 +226,7 @@ def pagar_boleto(boleto: Boleto):
     if(valor == 0):
         return JSONResponse(status_code=400, content={"erro": "Boleto inválido"})
     try:
-        debitar_valor(boleto.numero_conta, valor)
+        debitar_valor(boleto.sender, valor)
     except ConnectionError as e:
         return JSONResponse(status_code=500, content={"erro": str(e)})
     except RuntimeError as e:
