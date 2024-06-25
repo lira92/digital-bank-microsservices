@@ -13,6 +13,9 @@ public interface ContaRepository extends JpaRepository<Conta, Long> {
 	@Query(nativeQuery = true, value = "SELECT * FROM conta WHERE numero = :numero")
 	Conta findByNumero(@Param(value = "numero") Long numero);
 	
+	@Query(nativeQuery = true, value = "SELECT * FROM conta WHERE email = :email")
+	Conta findByEmail(@Param(value = "email") String email);
+	
 	@Query(nativeQuery = true, value = "SELECT COUNT(id) FROM conta WHERE numero = :numero")
 	int existsByNumero(@Param(value = "numero") Long numero);
 	
