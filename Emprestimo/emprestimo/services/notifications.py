@@ -25,7 +25,7 @@ class NotificationClient:
         self.timeout = timeout
         self.kwargs = kwargs
 
-    async def send_notification(self, recipients, subject, body, endpoint=None, params=None):
+    def send_notification(self, recipients, subject, body, endpoint=None, params=None):
         endpoint = NOTIFICATIONS_ENDPOINT if endpoint is None else endpoint
 
         data = {

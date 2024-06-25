@@ -3,12 +3,11 @@
 import datetime
 
 from typing import Optional, List
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 
 from core.schemas import RequestSchema, ResponseSchema
 
 from loans.enums import LoanStatus
-from services.configurations import ConfigurationClient
 
 
 ### Model Schemas ###
@@ -71,14 +70,6 @@ class LoanCreateRequestSchema(RequestSchema):
     numero_conta: int
     parcelas: int
     valor: float
-
-    @field_validator('parcelas')
-    @classmethod
-    def validate_portions(cls, value):
-        configuration_client = ConfigurationClient()
-        configurations = configuration_client.get_current_configurations()
-        if value < configurations['minimo_parcelamento'] or value > configurations['maximo_parcelamento']:
-            raise ValueError('Número inválido de parcelas')
 
     class Config(RequestSchema.Config):
         schema_extra = {

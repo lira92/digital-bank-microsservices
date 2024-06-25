@@ -25,7 +25,7 @@ class ConfigurationClient:
         self.timeout = timeout
         self.kwargs = kwargs
 
-    async def fetch_configurations(self, endpoint=None, params=None):
+    def fetch_configurations(self, endpoint=None, params=None):
         endpoint = CONFIGURATIONS_ENDPOINT if endpoint is None else endpoint
 
         response = requests.get(
@@ -41,8 +41,8 @@ class ConfigurationClient:
 
         return response.json()
 
-    async def get_current_configurations(self):
-        configurations = await self.fetch_configurations()
+    def get_current_configurations(self):
+        configurations = self.fetch_configurations()
 
         # TODO: Adicionar caching para fallback
 

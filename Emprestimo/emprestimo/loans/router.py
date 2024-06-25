@@ -2,7 +2,7 @@
 
 import datetime
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from core.database import Database
@@ -32,7 +32,7 @@ async def get_loans(
         request.portions < configurations['minimo_parcelamento']
         or request.portions > configurations['maximo_parcelamento']
     ):
-        raise ValueError('Número inválido de parcelas')
+        raise HTTPException(detail='Número inválido de parcelas', status_code=status.HTTP_400_BAD_REQUEST)
 
     loans = database.query(Loan)
     if request.status:
@@ -86,19 +86,26 @@ async def create_loan(
     }
 
 
-@router.post('/validar_empresitmo', response_model=LoanValidateResponseSchema)
+@router.post('/validar_emprestimo', response_model=LoanValidateResponseSchema)
 async def validate_loan(
     request: LoanValidateRequestSchema,
+    background_tasks: BackgroundTasks,
     database: Session = Depends(Database),
 ):
     loan = database.query(Loan).filter(Loan.id==request.id).first()
+    if loan.status != LoanStatus.PENDING:
+        raise HTTPException(
+            detail='Não é possível validar um emprestimo que não está pendente',
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
     loan.status = LoanStatus.APPROVED if request.aprovado else LoanStatus.DISAPPROVED
     loan.validated_at = datetime.datetime.now()
 
     database.commit()
     database.refresh(loan)
 
-    send_loan(loan)
+    background_tasks.add_task(send_loan, loan)
 
     return {
         'id': str(loan.id),

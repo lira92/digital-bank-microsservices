@@ -25,7 +25,7 @@ class AccountClient:
         self.timeout = timeout
         self.kwargs = kwargs
 
-    async def get_account_details(self, account_number, endpoint=None, params=None):
+    def get_account_details(self, account_number, endpoint=None, params=None):
         endpoint = ACCOUNT_DETAILS_ENDPOINT if endpoint is None else endpoint
         endpoint = endpoint.format(numero=account_number)
 
@@ -42,7 +42,7 @@ class AccountClient:
 
         return response.json()
 
-    async def send_loan_value(self, account_number, value, endpoint=None, params=None):
+    def send_loan_value(self, account_number, value, endpoint=None, params=None):
         endpoint = ACCOUNT_CREDIT_ENDPOINT if endpoint is None else endpoint
         endpoint = endpoint.format(numero=account_number)
 

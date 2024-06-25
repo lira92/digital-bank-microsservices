@@ -4,11 +4,11 @@ from services.accounts import AccountClient
 from services.notifications import NotificationClient
 
 
-async def send_loan(loan):
+def send_loan(loan):
     account_client = AccountClient()
     notification_client = NotificationClient()
 
-    account_details = await account_client.get_account_details(loan.account_number)
+    account_details = account_client.get_account_details(loan.account_number)
 
     recipients = [account_details['email']]
     subject = 'Emprestimo aprovado'
