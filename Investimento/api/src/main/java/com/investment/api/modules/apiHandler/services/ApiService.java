@@ -49,7 +49,7 @@ public class ApiService {
         } catch (IOException e) {
             throw new ExternalApiException(500, "Error while parsing response: " + e.getMessage());
         } catch (WebClientResponseException e) {
-            throw new ExternalApiException(500, "Error while requesting external API: " + e.getMessage());
+            throw new ExternalApiException(500, "Error while requesting external API: " + e.getMessage(), e.getResponseBodyAsString());
         }
     }
 
