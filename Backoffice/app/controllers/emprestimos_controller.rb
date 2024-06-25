@@ -45,8 +45,6 @@ class EmprestimosController < ApplicationController
 
   private
 
-
-
   def resultado_validacao_params
     params.permit(:id, :new_status)
   end

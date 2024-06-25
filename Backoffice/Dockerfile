@@ -25,5 +25,5 @@ USER rails:rails
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 ENV RAILS_ENV="development"
-EXPOSE 3000
+EXPOSE 3007
 CMD ["./bin/dev"]
