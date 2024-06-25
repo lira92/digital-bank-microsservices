@@ -6,11 +6,25 @@ services:
     labels:
       - "traefik.enabled=false"
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "5672:5672"
+      - "15672:15672"
     volumes:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  notifications-api:
+    build: Notificacoes/notifications-api
+    ports:
+      - "3002:3002"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+        
   api-gateway:
     image: traefik:v3.0
     command: --api.insecure=true --providers.docker
@@ -58,3 +72,4 @@ services:
     command: mnv spring-boot:run
     depends_on:
       - conta-corrente-db
+
