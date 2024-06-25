@@ -14,8 +14,7 @@ public class ApplyAccrual {
         this.applyAccrualService = applyAccrualService;
     }
 
-    // @Scheduled(cron = "0 0 22 * * *")
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 0 22 * * *")
     public void applyAccrual() {
         this.applyAccrualService.applyAccrual();   
     }

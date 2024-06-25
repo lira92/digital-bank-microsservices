@@ -3,7 +3,7 @@ package com.investment.api.modules.apiHandler.enums;
 public enum UrlEnum {
     CONTA_CORRENTE("http://contacorrente:3003/api/conta"),
     EMAIL(""),
-    BACK_OFFICE("");
+    BACK_OFFICE("http://api:3007/configuracao");
 
     private final String value;
 
