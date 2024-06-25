@@ -1,9 +1,8 @@
 package com.investment.api.modules.moneyTransaction.enums;
 
 public enum TransferType {
-    COMPESATE("Compensação"),
-    DEDUCTION_INVEST("dedução - investimento"),
-    CREDIT_INVEST("crédito - investimento");
+    DEDUCTION_INVEST("aporte - investimento"),
+    CREDIT_INVEST("resgate - investimento");
 
     private final String value;
 
