@@ -61,7 +61,9 @@ curl ...
 ## Como consultar extrato de uma conta
 
 ```
-curl ...
+curl -X 'GET' \
+  'http://localhost:3003/api/conta/saldo/1' \
+  -H 'accept: application/json'
 ```
 
 ## Como pagar um boleto
