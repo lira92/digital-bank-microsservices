@@ -31,8 +31,12 @@ services:
       db-investiment:
         condition: service_healthy
     networks:
+      - contacorrente_contacorrente-network
       - database-network-investiment
 
 networks:
   database-network-investiment:
-      driver: bridge    
+      driver: bridge
+  contacorrente_contacorrente-network:
+      external: true
+  
