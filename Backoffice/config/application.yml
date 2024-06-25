@@ -1,0 +1,7 @@
+production:
+  api_emprestimo: 'http://localhost:3001'
+  api_onboarding: 'http://localhost:3005'
+
+development:
+  api_emprestimo: 'http://localhost:3001'
+  api_onboarding: 'http://localhost:3005'
