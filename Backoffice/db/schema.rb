@@ -30,8 +30,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_23_212152) do
 
   create_table "emprestimos", force: :cascade do |t|
     t.integer "emprestimo_id"
-    t.string "conta"
-    t.string "valor"
+    t.bigint "conta"
+    t.float "valor"
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -39,7 +39,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_23_212152) do
 
   create_table "onboardings", force: :cascade do |t|
     t.string "cpf"
-    t.boolean "status"
+    t.boolean "status", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
