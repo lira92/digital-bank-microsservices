@@ -9,7 +9,7 @@ from models.payment import Boleto, Payment, ScheduledBoleto, ScheduledBoletoStat
 import requests
 
 
-BASE_URL = "http://172.18.113.235:3003/api/"
+CONTA_CORRENTE_BASE_URL = "http://contacorrente:3003/api/"
 URL_NOTIFICACAO = "http://localhost:3002/"
 
 numero_boleto = "34191.79001 01043.510047 91020.150008 1 97450026000"
@@ -63,7 +63,7 @@ def enviar_notificacao_credito(recipient, conta: int, value: float):
 def debitar_valor(numero_conta: int, valor: float) -> None:
     try:
         response = requests.patch(
-            f"{BASE_URL}conta/debitar",
+            f"{CONTA_CORRENTE_BASE_URL}conta/debitar",
             json={
                 "numero": numero_conta,
                 "valor": valor,
@@ -77,7 +77,7 @@ def debitar_valor(numero_conta: int, valor: float) -> None:
 def creditar_valor(numero_conta: int, valor: float) -> None:
     try:
         response = requests.patch(
-            f"{BASE_URL}conta/creditar",
+            f"{CONTA_CORRENTE_BASE_URL}conta/creditar",
             json={
                 "numero": numero_conta,
                 "valor": valor,
@@ -102,7 +102,7 @@ def decode_boleto(boleto: str) -> float:
 
 def obter_saldo(numero_conta: int) -> float:
     try:
-        response = requests.get(f"{BASE_URL}conta/saldo/{numero_conta}")
+        response = requests.get(f"{CONTA_CORRENTE_BASE_URL}conta/saldo/{numero_conta}")
     except requests.exceptions.ConnectionError:
         raise ConnectionError("Não foi possível conectar ao serviço da conta")
     except requests.exceptions.RequestException as e:
@@ -126,7 +126,7 @@ def obter_saldo(numero_conta: int) -> float:
 
 def obter_conta(numero_conta: int):
     try:
-        response = requests.get(f"{BASE_URL}conta/numero/{numero_conta}")
+        response = requests.get(f"{CONTA_CORRENTE_BASE_URL}conta/numero/{numero_conta}")
 
     except requests.exceptions.ConnectionError:
         raise ConnectionError("Não foi possível conectar ao serviço da conta")
