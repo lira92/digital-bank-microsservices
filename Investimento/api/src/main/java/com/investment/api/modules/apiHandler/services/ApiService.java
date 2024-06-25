@@ -3,12 +3,11 @@ package com.investment.api.modules.apiHandler.services;
 import java.io.IOException;
 import java.util.Map;
 
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -19,12 +18,12 @@ import com.investment.api.modules.apiHandler.exceptions.ExternalApiException;
 @Service
 public class ApiService {
     
-    private final RestTemplate restTemplate;
+    private final WebClient webClient;
     private final ObjectMapper objectMapper;
 
-    public ApiService(RestTemplate restTemplate, ObjectMapper objectMapper) {
-        this.restTemplate = restTemplate;
+    public ApiService(ObjectMapper objectMapper, WebClient.Builder webClientBuilder) {
         this.objectMapper = objectMapper;
+        this.webClient = webClientBuilder.build();
     }
 
     private <T> ResponseDto request(String url, HttpMethod method, T body, Map<String, String> queryParams) {
@@ -36,14 +35,23 @@ public class ApiService {
             }
         }
 
-        HttpEntity<T> entity = new HttpEntity<>(body);
+        WebClient.RequestBodySpec requestSpec = this.webClient.method(method).uri(builder.toUriString());
+
+        if (body != null) {
+            requestSpec.bodyValue(body);
+        }
+
+        System.out.println(body);
 
         try {
-            ResponseEntity<String> response = restTemplate.exchange(builder.build().toUri(), method, entity, String.class);
+            ResponseEntity<String> response = requestSpec.retrieve()
+                                             .toEntity(String.class)
+                                             .block();
             return this.bodyMapper(response);
         } catch (IOException e) {
             throw new ExternalApiException(500, "Error while parsing response: " + e.getMessage());
-        } catch (RestClientException e) {
+        } catch (WebClientResponseException e) {
+            System.out.println("erro: " + e.getMessage());
             throw new ExternalApiException(500, "Error while requesting external API: " + e.getMessage());
         }
     }
