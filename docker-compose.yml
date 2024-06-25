@@ -72,4 +72,56 @@ services:
     command: mnv spring-boot:run
     depends_on:
       - conta-corrente-db
+  db-investiment:
+    container_name: db-investiment
+    image: mysql:8.1.0
+    restart: always
+    env_file:
+      - Investimento/api/.env
+    environment:
+      TZ: America/Sao_Paulo
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_TCP_PORT: 3306
+    ports:
+      - 3306:3306
+    command: ["--event-scheduler=ON"]
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 30s
+      retries: 10
+  api-investiment:
+    build: ./Investimento/
+    container_name: api-investiment
+    restart: always
+    ports:
+      - 3006:8080
+    depends_on:
+      db-investiment:
+        condition: service_healthy
+  backoffice-postgres:
+    image: postgres:16-alpine
+    restart: always
+    container_name: backoffice_db
+    volumes:
+      - backoffice_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    command: "postgres -c 'max_connections=500'"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Dev!123
+      - POSTGRES_PORT=5432
+
+  backoffice-api:
+    build: ./Backoffice/
+    container_name: backoffice_api
+    tty: true
+    stdin_open: true
+    depends_on:
+      - backoffice-postgres
+    ports:
+      - '3007:3007'
+
+volumes:
+  backoffice_data: {}
 
