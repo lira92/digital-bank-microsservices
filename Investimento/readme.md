@@ -1,7 +1,7 @@
 # API de Investimentos
 
 ## Descrição
-Esta é a API de Investimentos, que permite a criação de investimentos, resgate diário e aporte ao investimento. A API roda na porta `3007`.
+Esta é a API de Investimentos, que permite a criação de investimentos, resgate diário e aporte ao investimento. A API roda na porta `3006`.
 
 ## Endpoints
 - **URL:** `/goals`
