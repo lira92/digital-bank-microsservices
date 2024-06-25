@@ -33,11 +33,11 @@ public class RedeemService {
     public void redeem(TransactionForm transactionForm) {
         Goal goal = this.goalRepository.findById(transactionForm.goalId()).orElseThrow();
 
-        if (!goal.canUpdateAmount(transactionForm.amount())) {
+        if (!goal.canUpdateAmount(transactionForm.amount() * -1)) {
             throw new NoCashException();
         }
 
-        if (this.tranferMoney(transactionForm.amount(), goal.getAccountId())) {
+        if (this.tranferMoney(transactionForm.amount(), goal.getAccountNumber())) {
             this.updateAmountService.updateAmount(goal, this.createTransactionHistory(goal, transactionForm.amount()));
         }
     }
@@ -50,13 +50,14 @@ public class RedeemService {
                 goal);
     }
 
-    private boolean tranferMoney(float amount, Long accountId) {
-        TransactionDto transactionDto = new TransactionDto(TransferType.CREDIT_INVEST.getValue(), amount, accountId);
+    private boolean tranferMoney(float amount, Long accountNumber) {
+        TransactionDto transactionDto = new TransactionDto(TransferType.CREDIT_INVEST.getValue(), amount, accountNumber);
         String url = UrlEnum.CONTA_CORRENTE.getValue() + "/creditar";
 
-        ResponseDto responseDto = this.apiService.post(url, transactionDto);
+        ResponseDto responseDto = this.apiService.patch(url, transactionDto);
 
         if (!responseDto.statusCode().is2xxSuccessful()) {
+            System.out.println("erro status: " + responseDto.statusCode().value());
             throw new ExternalApiException(responseDto.statusCode().value(), "Erro ao transferir dinheiro - falha de comunicação com o serviço");
         }
 

@@ -13,9 +13,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record GoalForm(
-    @NotNull(message = "user_id não pode ser nulo")
-    @JsonProperty("account_id")
-    Long accountId,
+    @NotNull(message = "account_number não pode ser nulo")
+    @JsonProperty("account_number")
+    Long accountNumber,
 
     @NotBlank(message = "name não pode estar vazio")
     String name,

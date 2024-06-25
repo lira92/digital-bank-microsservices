@@ -2,6 +2,7 @@ package com.investment.api.modules.goal.entities;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.ColumnTransformer;
@@ -14,6 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.investment.api.modules.goal.forms.GoalForm;
 import com.investment.api.modules.moneyTransaction.entities.TransactionHistory;
+import com.investment.api.modules.moneyTransaction.exceptions.NoCashException;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -58,9 +60,9 @@ public class Goal {
     @Column(nullable = false)
     private LocalDate targetDate;
 
-    @NotNull(message = "Id da conta não pode estar vazio")
+    @NotNull(message = "Número daconta não pode estar vazio")
     @Column(nullable = false)
-    private Long accountId;
+    private Long accountNumber;
 
     @NotNull(message = "Email do usuário não pode estar vazio")
     @Column(nullable = false)
@@ -82,28 +84,38 @@ public class Goal {
     @Column(nullable = false)
     private boolean deleted = false;
 
-    public Goal(String name, double targetValue, LocalDate targetDate, Long accountId) {
+    public Goal(){
+        this.deductionRegisters = new ArrayList<>();
+        this.transactionHistory = new ArrayList<>();
+    }
+
+    public Goal(String name, double targetValue, LocalDate targetDate, Long accountNumber) {
         this.name = name;
         this.currentValue = 0.0f;
         this.targetValue = targetValue;
         this.targetDate = targetDate;
-        this.accountId = accountId;
+        this.accountNumber = accountNumber;
         this.userEmail = "";
         this.deleted = false;
+        this.deductionRegisters = new ArrayList<>();
+        this.transactionHistory = new ArrayList<>();
     }
 
-    public Goal(Long id, String name, float currentValue, double targetValue, LocalDate targetDate, Long accountId,
-            String userEmail, LocalDateTime createdAt, LocalDateTime updatedAt, boolean deleted) {
+    public Goal(Long id, String name, float currentValue, double targetValue, LocalDate targetDate, Long accountNumber,
+            String userEmail, LocalDateTime createdAt, LocalDateTime updatedAt, boolean deleted, List<DeductionRegister> deductionRegisters,
+            List<TransactionHistory> transactionHistory) {
         this.id = id;
         this.name = name;
         this.currentValue = currentValue;
         this.targetValue = targetValue;
         this.targetDate = targetDate;
-        this.accountId = accountId;
+        this.accountNumber = accountNumber;
         this.userEmail = userEmail;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.deleted = deleted;
+        this.deductionRegisters = deductionRegisters;
+        this.transactionHistory = transactionHistory;
     }
 
     public void addDeductionRegister(DeductionRegister deductionRegister) {
@@ -115,15 +127,15 @@ public class Goal {
     }
 
     public void updateAmount(float amount) {
-        if (canUpdateAmount(amount)) {
-
+        if (!canUpdateAmount(amount)) {
+            throw new NoCashException();
         }
         
         this.currentValue += amount;
     }
 
     public boolean canUpdateAmount(float amount) {
-        return this.currentValue + amount < 0;
+        return this.currentValue + amount >= 0;
     }
 
     public static Goal fromForm(GoalForm form) {
@@ -131,7 +143,7 @@ public class Goal {
             form.name(),
             form.targetValue(),
             form.targetDate(),
-            form.accountId() 
+            form.accountNumber() 
         );
     }
 }
