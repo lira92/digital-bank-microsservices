@@ -38,13 +38,37 @@ curl --request POST \
   --url /goals \
   --header 'Content-Type: application/json' \
   --data '{
-      "account_id": 1,
-      "goal_name": "name",
-      "target_value": 1000.50,
-      "target_date": "2024-01-30",
-      "deduction_date": 15 
+	"target_date": "2026-04-04",
+	"name": "viagem",
+	"target_value": 12000,
+	"deduction_day": 25,
+	"account_number": 50445
   }'
 ```
+
+## Como colocar dinheiro em um investimento
+
+```
+curl --request POST \
+  --url /goals/contribute \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"goal_id": 2,
+	"amount": 500.5
+  }'
+```
+## Como retirar dinheiro de um investimento
+
+```
+curl --request POST \
+  --url /goals/redeem \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"goal_id": 2,
+	"amount": 500.5
+  }'
+```
+
 
 ## Como aprovar/negar um empréstimo
 
