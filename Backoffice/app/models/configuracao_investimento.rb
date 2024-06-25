@@ -1,0 +1,2 @@
+class ConfiguracaoInvestimento < ApplicationRecord
+end
