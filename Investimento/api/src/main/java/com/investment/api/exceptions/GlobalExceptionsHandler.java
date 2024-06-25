@@ -56,4 +56,10 @@ public class GlobalExceptionsHandler {
         Map<String, String> response = Map.of("error", "Não há dinheiro suficiente para realizar essa operação");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+
+    @ExceptionHandler( {HttpException.class} )
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> httpClientErrorException(HttpException ex) {
+        return ResponseEntity.status(ex.getStatus()).body(Map.of("message", ex.getMessage()));
+    }
 }
