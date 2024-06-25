@@ -28,7 +28,7 @@ def enviar_notificacao_agendamento(conta, sender: int, value: float, data_agenda
         "messageBody": f"<p>Um pagamento de R${value:.2f} foi agendado por {sender} em {data_agendamento}.</p>"
     }
     try:
-        response = requests.post(URL_NOTIFICACAO, json=json.dumps(notification_payload))
+        response = requests.post(URL_NOTIFICACAO, json=notification_payload)
         response.raise_for_status()
         print("Notificação de agendamento enviada com sucesso")
     except requests.exceptions.RequestException as e:
@@ -41,7 +41,6 @@ def enviar_notificacao_debito(recipient, conta: int, value: float):
         "messageBody": f"<p>Um débito de R${value:.2f} foi realizado em sua conta {conta}.</p>"
     }
     try:
-        print(URL_NOTIFICACAO)
         response = requests.post(URL_NOTIFICACAO, json=notification_payload)
         response.raise_for_status()
         print("Notificação de débito enviada com sucesso")
