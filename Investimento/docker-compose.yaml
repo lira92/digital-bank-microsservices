@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  db-investiment:
+    container_name: db-investiment
+    image: mysql:8.1.0
+    restart: always
+    env_file:
+      - api/.env
+    environment:
+      TZ: America/Sao_Paulo
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_TCP_PORT: 3306
+    ports:
+      - 3306:3306
+    command: ["--event-scheduler=ON"]
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 30s
+      retries: 10
+    networks:
+      - database-network-investiment
+
+  api-investiment:
+    build: .
+    container_name: api-investiment
+    restart: always
+    ports:
+      - 3006:8080
+    depends_on:
+      db-investiment:
+        condition: service_healthy
+    networks:
+      - contacorrente_contacorrente-network
+      - database-network-investiment
+      - backoffice_backoffice_network
+
+networks:
+  database-network-investiment:
+      driver: bridge
+  contacorrente_contacorrente-network:
+      external: true
+  backoffice_backoffice_network:
+      external: true
+  

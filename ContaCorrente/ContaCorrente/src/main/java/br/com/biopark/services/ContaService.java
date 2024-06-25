@@ -4,16 +4,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
-import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +60,17 @@ public class ContaService {
 	}
 	
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+	public ContaVO findByEmail(String email, String senha) {
+		if (email == null) throw new MinhaException("Email deve ser preenchido!");
+		if (repository.existsByEmail(email) == 0) throw new MinhaException("Conta não encontrada!");
+		Conta conta = repository.findByEmail(email);
+		if (senha.equals(conta.getSenha()) == false) throw new MinhaException("Senha não confere!");
+		ContaVO contaVO = Mapper.parseObject(conta, ContaVO.class);
+		contaVO.add(linkTo(methodOn(ContaController.class).findById(contaVO.getKey())).withSelfRel());
+		return contaVO;
+	}
+	
+	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public double findSaldoByNumero(Long numero) {
 		if (numero == null) throw new MinhaException("Número deve ser preenchido!");
 		if (repository.existsByNumero(numero) == 0) throw new MinhaException("Conta não encontrada!");
@@ -95,7 +100,6 @@ public class ContaService {
 		}
 		conta.setNumero(randomLong);
 		conta.setStatus(true);
-		conta.setSenha(encriptPassword(conta.getSenha()));
 		Conta entity = Mapper.parseObject(conta, Conta.class);
 		ContaVO contaVO =  Mapper.parseObject(repository.save(entity), ContaVO.class);
 		notificationService.sendWelcomeNotification(contaVO.getEmail(), contaVO.getNome(), contaVO.getNumero(), contaVO.getSaldo());
@@ -147,16 +151,5 @@ public class ContaService {
 		ContaVO contaVO = Mapper.parseObject(repository.save(conta), ContaVO.class);
 		contaVO.add(linkTo(methodOn(ContaController.class).findById(contaVO.getKey())).withSelfRel());
 		return contaVO;
-	}
-	
-	public String encriptPassword(String password) {
-		Map<String, PasswordEncoder> encoders = new HashMap<>();
-		Pbkdf2PasswordEncoder pbkdf2Encoder = new Pbkdf2PasswordEncoder("", 8, 185000, SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
-		encoders.put("pbkdf2", pbkdf2Encoder);
-		DelegatingPasswordEncoder passwordEncoder = new DelegatingPasswordEncoder("pbkdf2", encoders);
-		passwordEncoder.setDefaultPasswordEncoderForMatches(pbkdf2Encoder);
-		
-		String result = passwordEncoder.encode(password);
-		return result;
 	}
 }

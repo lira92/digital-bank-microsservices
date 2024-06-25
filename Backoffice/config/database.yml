@@ -5,7 +5,7 @@ default: &default
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   username: postgres
   password: Dev!123
-  host: postgres
+  host: backoffice-postgres
   port: 5432
 
 development:
@@ -13,7 +13,7 @@ development:
   database: backoffice_development
   username: postgres
   password: Dev!123
-  host: postgres
+  host: backoffice-postgres
   port: 5432
 
 
