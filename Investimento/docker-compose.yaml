@@ -26,7 +26,7 @@ services:
     container_name: api-investiment
     restart: always
     ports:
-      - 3007:8080
+      - 3006:8080
     depends_on:
       db-investiment:
         condition: service_healthy

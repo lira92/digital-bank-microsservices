@@ -22,7 +22,7 @@ RUN useradd rails --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
 USER rails:rails
 
-ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+ENTRYPOINT ["./bin/docker-entrypoint"]
 
 ENV RAILS_ENV="development"
 EXPOSE 3007
