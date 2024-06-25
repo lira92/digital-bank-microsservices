@@ -10,7 +10,7 @@ import requests
 
 
 CONTA_CORRENTE_BASE_URL = "http://contacorrente:3003/api/"
-URL_NOTIFICACAO = "http://localhost:3002/"
+URL_NOTIFICACAO = "http://notifications-api:3002/notifications"
 
 numero_boleto = "34191.79001 01043.510047 91020.150008 1 97450026000"
 
@@ -275,16 +275,16 @@ def agendar_transferencia(pagamentomodel: ScheduledPayment):
         if pagamento.data_agendamento < datetime.now().date():
             return  JSONResponse(status_code=400, content={"message": "Data de agendamento precisa ser uma data futura"})
 
-        if(obter_conta(pagamento.sender) is None):
+        conta_sender = obter_conta(pagamento.sender)
+        if(conta_sender is None):
             return  JSONResponse(status_code=400, content={"message": "Conta de rementente inexistente"})
 
         if(obter_conta(pagamento.receiver) is None):
-            print('bateu 2')
             return  JSONResponse(status_code=400, content={"message": "Conta de recebedor inexistente"})
 
 
         agendamentos.append(pagamento)
-
+        enviar_notificacao_agendamento(conta_sender, pagamento.sender, pagamento.value, str(pagamento.data_agendamento))
         if(pagamento.value > obter_saldo(pagamento.sender)):
             return {
                 "Mensagem": "Transferência agendada, certifique-se de ter saldo suficiente na data de pagamento.",
@@ -310,7 +310,7 @@ def agendar_transferencia(pagamentomodel: ScheduledPayment):
 
 
 agendamentosboleto: List[ScheduledBoleto] = []
-   #função em andamento
+
 @app.post("/agendar-boleto")
 def agendar_boleto(boleto: ScheduledBoleto):
     """
@@ -357,15 +357,22 @@ def agendar_boleto(boleto: ScheduledBoleto):
 
     conta.json()
     agendamentosboleto.append(boletoagendado)
-    enviar_notificacao_agendamento(conta, boletoagendado.sender, boletoagendado.value, str(boletoagendado.data_agendamento))
+    response =enviar_notificacao_agendamento(conta, boletoagendado.sender, boletoagendado.value, str(boletoagendado.data_agendamento))
     if(boletoagendado.value > obter_saldo(boletoagendado.sender)):
-            return {
-                "Mensagem": "Boleto agendado com sucesso, certifique-se de ter saldo suficiente na data de pagamento.",
-                "Data": str(boletoagendado.data_agendamento),
-                "Valor": f"R$ {boletoagendado.value:.2f}",
-                "Descrição": boletoagendado.descricao,
-                "Situação": "Agendado"
-            }
+            if(response.status_code == 200):
+                return {
+                    "Mensagem": "Boleto agendado com sucesso, certifique-se de ter saldo suficiente na data de pagamento.",
+                    "Data": str(boletoagendado.data_agendamento),
+                    "Valor": f"R$ {boletoagendado.value:.2f}",
+                    "Descrição": boletoagendado.descricao,
+                    "Situação": "Agendado"
+                }
+            else:
+                return  {"message": "Boleto agendado com sucesso",
+                        "Data": str(boletoagendado.data_agendamento),
+                        "Valor": f"R$ {boletoagendado.value:.2f}",
+                        "Descricão": boletoagendado.descricao,
+                        "Situação": "Agendado" if not boletoagendado.realizado else "Realizado"}
     else:
             return  {"mensagem": "Boleto agendado com sucesso",
                     "Data": str(boletoagendado.data_agendamento),
