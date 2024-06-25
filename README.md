@@ -62,7 +62,7 @@ curl ...
 
 ```
 curl -X 'GET' \
-  'http://localhost:3003/api/conta/saldo/1' \
+  'http://localhost:3003/api/movimentacao?numero=00000' \
   -H 'accept: application/json'
 ```
 
@@ -70,4 +70,12 @@ curl -X 'GET' \
 
 ```
 curl ...
+```
+
+### Como consultar o saldo de uma conta
+
+```
+curl -X 'GET' \
+  'http://localhost:3003/api/conta/saldo/1' \
+  -H 'accept: application/json'
 ```
