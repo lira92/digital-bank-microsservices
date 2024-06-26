@@ -24,7 +24,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-        
+
   api-gateway:
     image: traefik:v3.0
     command: --api.insecure=true --providers.docker
@@ -123,3 +123,10 @@ services:
 volumes:
   backoffice_data: {}
 
+  pagamento:
+    build: ./Pagamento
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./Pagamento:/app
+      - /app/__pycache__
