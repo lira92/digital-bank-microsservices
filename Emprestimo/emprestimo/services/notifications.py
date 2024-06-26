@@ -1,5 +1,6 @@
 """Services' Notification Client for Emprestimo microservice."""
 
+import json
 import urllib.parse
 
 from fastapi import status
@@ -28,11 +29,11 @@ class NotificationClient:
     def send_notification(self, recipients, subject, body, endpoint=None, params=None):
         endpoint = NOTIFICATIONS_ENDPOINT if endpoint is None else endpoint
 
-        data = {
+        data = json.dumps({
             'messageRecipients': recipients,
             'messageSubject': subject,
             'messageBody': body,
-        }
+        })
 
         response = requests.get(
             urllib.parse.urljoin(self.url, endpoint),

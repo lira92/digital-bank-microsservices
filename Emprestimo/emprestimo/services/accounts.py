@@ -1,5 +1,6 @@
 """Services' Account Client for Emprestimo microservice."""
 
+import json
 import urllib.parse
 
 from fastapi import status
@@ -37,6 +38,7 @@ class AccountClient:
             params=params,
             **self.kwargs,
         )
+
         if response.status_code != status.HTTP_200_OK:
             raise AccountCommunicationException('Error getting account details')
 
@@ -44,12 +46,12 @@ class AccountClient:
 
     def send_loan_value(self, account_number, value, endpoint=None, params=None):
         endpoint = ACCOUNT_CREDIT_ENDPOINT if endpoint is None else endpoint
-        endpoint = endpoint.format(numero=account_number)
 
-        data = {
-            'numero': account_number,
-            'valor': value,
-        }
+        data = json.dumps({
+            'nome': 'Emprestimo',
+            'numero': int(account_number),
+            'valor': float(value),
+        })
 
         response = requests.patch(
             urllib.parse.urljoin(self.url, endpoint),
@@ -60,5 +62,6 @@ class AccountClient:
             params=params,
             **self.kwargs,
         )
+
         if response.status_code != status.HTTP_200_OK:
             raise AccountCommunicationException('Error sending loan value')
