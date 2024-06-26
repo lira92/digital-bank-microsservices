@@ -20,7 +20,7 @@ class ConfigurationClient:
 
     def __init__(self, url=None, verify=False, timeout=60, **kwargs):
         self.url = CONFIGURATIONS_URL if url is None else url
-        self.headers = {'Accept': 'application/json'}
+        self.headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
         self.verify = verify
         self.timeout = timeout
         self.kwargs = kwargs
