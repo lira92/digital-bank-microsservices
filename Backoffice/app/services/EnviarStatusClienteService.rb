@@ -17,7 +17,7 @@ class EnviarStatusClienteService
 	end
     
 	def enviar_status
-		uri = URI("#{ENV['api_onboarding']}/api/downstream/prospect")
+		uri = URI("#{ENV['api_onboarding']}/api/prospect")
 		body = { cpf: @onboarding.cpf, status: @new_status }
 		headers = { 'Content-Type': 'application/json' }
 		@response = Faraday.put uri, body.to_json, headers
