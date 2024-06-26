@@ -33,7 +33,7 @@ CONFIGURATIONS_ENDPOINT = os.getenv('CONFIGURATIONS_ENDPOINT', '/configuracao/em
 
 ACCOUNTS_URL = os.getenv('ACCOUNTS_URL')
 ACCOUNT_DETAILS_ENDPOINT = os.getenv('ACCOUNT_DETAILS_ENDPOINT', '/api/conta/{numero}')
-ACCOUNT_CREDIT_ENDPOINT = os.getenv('ACCOUNT_CREDIT_ENDPOINT', '/api/conta/creditar/{numero}')
+ACCOUNT_CREDIT_ENDPOINT = os.getenv('ACCOUNT_CREDIT_ENDPOINT', '/api/conta/creditar')
 
 
 # Notifications settings

@@ -16,4 +16,4 @@ RUN mkdir -p "/var/log/integrations"
 
 EXPOSE 3001
 
-ENTRYPOINT ["/usr/src/app/docker/entrypoint.sh"]
+ENTRYPOINT ["sh", "/usr/src/app/docker/entrypoint.sh"]

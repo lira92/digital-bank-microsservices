@@ -16,6 +16,7 @@ class Loan(BaseModel):
     id: str
     numero_conta: int
     valor: float
+    parcelas: int
     status: LoanStatus
     created_at: datetime.datetime
     validated_at: Optional[datetime.datetime]
@@ -31,7 +32,7 @@ class LoanListRequestSchema(RequestSchema):
         schema_extra = {
             'example': {
                 'numero_conta': 123456789,
-                'status': 'APROVADO',
+                'status': 'aprovado',
             },
         }
 
@@ -47,7 +48,8 @@ class LoanListResponseSchema(ResponseSchema):
                         'id': '00000000-0000-0000-0000-000000000001',
                         'numero_conta': 123456789,
                         'valor': 1000.00,
-                        'status': 'PENDENTE',
+                        'parcelas': 4,
+                        'status': 'pendente',
                         'created_at': '2021-01-01T00:00:00',
                         'validated_at': None,
                     },
@@ -55,7 +57,8 @@ class LoanListResponseSchema(ResponseSchema):
                         'id': '00000000-0000-0000-0000-000000000002',
                         'numero_conta': 987654321,
                         'valor': 2000.00,
-                        'status': 'APROVADO',
+                        'parcelas': 8,
+                        'status': 'aprovado',
                         'created_at': '2021-01-02T00:00:00',
                         'validated_at': '2021-01-03T00:00:00',
                     },
@@ -75,6 +78,7 @@ class LoanCreateRequestSchema(RequestSchema):
         schema_extra = {
             'example': {
                 'numero_conta': 123456789,
+                'parcelas': 4,
                 'valor': 1000.00,
             },
         }
@@ -84,6 +88,7 @@ class LoanCreateResponseSchema(ResponseSchema):
     id: str
     numero_conta: int
     valor: float
+    parcelas: int
     status: LoanStatus
     created_at: datetime.datetime
     validated_at: Optional[datetime.datetime]
@@ -94,7 +99,8 @@ class LoanCreateResponseSchema(ResponseSchema):
                 'id': '00000000-0000-0000-0000-000000000001',
                 'numero_conta': 123456789,
                 'valor': 1000.00,
-                'status': 'APROVADO',
+                'parcelas': 4,
+                'status': 'aprovado',
                 'created_at': '2021-01-01T00:00:00',
                 'validated_at': '2021-01-02T00:00:00',
             },
