@@ -20,7 +20,7 @@ services:
   contacorrente:
     restart: always
     build: ./ContaCorrente
-    working_dir: /ContaCorrente
+    # working_dir: /ContaCorrente
     environment:
       TZ: America/Sao_Paulo
       SPRING.DATASOURCE.URL: jdbc:mysql://db:3306/contacorrente?useTimezone=true&serverTimezone=UTC
@@ -28,7 +28,7 @@ services:
       SPRING.DATASOURCE.PASSWORD: admin123
     ports:
       - 3003:3003
-    command: mnv spring-boot:run
+    # command: mnv spring-boot:run
     depends_on:
       - db
     networks:

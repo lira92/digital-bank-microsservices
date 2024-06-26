@@ -4,25 +4,13 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
-import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import br.com.biopark.controllers.ContaController;
 import br.com.biopark.dtos.MovimentacaoDTO;
@@ -43,7 +31,7 @@ public class ContaService {
 	@Autowired
 	MovimentacaoRepository movimentacaoRepository;
 	@Autowired
-	private RestTemplate restTemplate;
+	NotificationService notificationService;
 	
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public List<ContaVO> findAll(Integer page){
@@ -69,6 +57,17 @@ public class ContaService {
 		ContaVO conta = Mapper.parseObject(repository.findByNumero(numero), ContaVO.class);
 		conta.add(linkTo(methodOn(ContaController.class).findById(conta.getKey())).withSelfRel());
 		return conta;
+	}
+	
+	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+	public ContaVO findByEmail(String email, String senha) {
+		if (email == null) throw new MinhaException("Email deve ser preenchido!");
+		if (repository.existsByEmail(email) == 0) throw new MinhaException("Conta não encontrada!");
+		Conta conta = repository.findByEmail(email);
+		if (senha.equals(conta.getSenha()) == false) throw new MinhaException("Senha não confere!");
+		ContaVO contaVO = Mapper.parseObject(conta, ContaVO.class);
+		contaVO.add(linkTo(methodOn(ContaController.class).findById(contaVO.getKey())).withSelfRel());
+		return contaVO;
 	}
 	
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
@@ -101,9 +100,9 @@ public class ContaService {
 		}
 		conta.setNumero(randomLong);
 		conta.setStatus(true);
-		conta.setSenha(encriptPassword(conta.getSenha()));
 		Conta entity = Mapper.parseObject(conta, Conta.class);
 		ContaVO contaVO =  Mapper.parseObject(repository.save(entity), ContaVO.class);
+		notificationService.sendWelcomeNotification(contaVO.getEmail(), contaVO.getNome(), contaVO.getNumero(), contaVO.getSaldo());
 		contaVO.add(linkTo(methodOn(ContaController.class).findById(contaVO.getKey())).withSelfRel());
 		return contaVO;
 	}
@@ -130,20 +129,7 @@ public class ContaService {
 		if (repository.existsByNumero(movimentacao.getNumero()) == 0) throw new MinhaException("Conta não encontrada!");
 		Conta conta = repository.findByNumero(movimentacao.getNumero());
 		if (conta.isStatus() == false) throw new MinhaException("Não é possível debitar pois conta está inativa!");
-		if (movimentacao.getValor() > conta.getSaldo()) {
-			String url = "http://localhost:3002/notifications";
-			HttpHeaders headers = new HttpHeaders();
-		    headers.setContentType(MediaType.APPLICATION_JSON);
-		    Map<String, Object> requestBody = new HashMap<>();
-		    List<String> recipients = new ArrayList<>();
-		    recipients.add(conta.getEmail());
-	        requestBody.put("messageRecipients", recipients);
-	        requestBody.put("messageSubject", "Não foi possível realizar o pagamento de R$ " + movimentacao.getValor());
-	        requestBody.put("messageBody", "Não foi possível realizar o seu pagamento de R$ " + movimentacao.getValor() + " por saldo insuficiente. Adicione mais dinheiro em sua conta e tente novamente!");
-	        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
-	        restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
-			throw new MinhaException("Valor excede o saldo da conta! Email foi enviado ao dono.");
-		}
+		if (movimentacao.getValor() > conta.getSaldo()) throw new MinhaException("Valor excede o saldo da conta!");
 		conta.setSaldo(conta.getSaldo() - movimentacao.getValor());
 		Movimentacao trans = new Movimentacao(movimentacao.getNome(), movimentacao.getValor(), Tipo.DEBITO, LocalDateTime.now(), conta);
 		movimentacaoRepository.save(trans);
@@ -165,16 +151,5 @@ public class ContaService {
 		ContaVO contaVO = Mapper.parseObject(repository.save(conta), ContaVO.class);
 		contaVO.add(linkTo(methodOn(ContaController.class).findById(contaVO.getKey())).withSelfRel());
 		return contaVO;
-	}
-	
-	public String encriptPassword(String password) {
-		Map<String, PasswordEncoder> encoders = new HashMap<>();
-		Pbkdf2PasswordEncoder pbkdf2Encoder = new Pbkdf2PasswordEncoder("", 8, 185000, SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
-		encoders.put("pbkdf2", pbkdf2Encoder);
-		DelegatingPasswordEncoder passwordEncoder = new DelegatingPasswordEncoder("pbkdf2", encoders);
-		passwordEncoder.setDefaultPasswordEncoderForMatches(pbkdf2Encoder);
-		
-		String result = passwordEncoder.encode(password);
-		return result;
 	}
 }
