@@ -15,3 +15,8 @@ Para começar utilize os comandos para:
 - Next 14
 - Prisma JS
 - Vercel (deploy)
+  
+## Documentação
+
+Documentaçao da api em:
+<https://documenter.getpostman.com/view/10111188/2sA3XWdymm>

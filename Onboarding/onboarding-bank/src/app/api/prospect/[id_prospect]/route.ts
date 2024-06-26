@@ -7,31 +7,31 @@ export async function GET(
 ) {
   try {
     const idProspect = Number(params.id_prospect);
-    const prospect = await prospectService.getById(idProspect)
-   if(prospect){
-    return new Response(
-      JSON.stringify(await prospectService.getById(idProspect)),
-      {
-        status: 200,
-        headers: {
-          "content-type": "application/json",
-        },
-      }
-    );
-   }else{
-    return new Response(
-      JSON.stringify({
-        message: "Prospect not found",
-        success: false,
-      }),
-      {
-        status: 400,
-        headers: {
-          "content-type": "application/json",
-        },
-      }
-    );
-   }
+    const prospect = await prospectService.getById(idProspect);
+    if (prospect) {
+      return new Response(
+        JSON.stringify(await prospectService.getById(idProspect)),
+        {
+          status: 200,
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      );
+    } else {
+      return new Response(
+        JSON.stringify({
+          message: "Prospect not found",
+          success: false,
+        }),
+        {
+          status: 400,
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      );
+    }
   } catch (error: any) {
     return new Response(
       JSON.stringify({
@@ -55,15 +55,31 @@ export async function PUT(
   try {
     const body: Prospect = await req.json();
     const idProspect = Number(params.id_prospect);
-    return new Response(
-      JSON.stringify(await prospectService.update(idProspect, body)),
-      {
-        status: 200,
-        headers: {
-          "content-type": "application/json",
-        },
-      }
-    );
+    const prospect = await prospectService.getById(idProspect);
+    if (prospect) {
+      return new Response(
+        JSON.stringify(await prospectService.update(idProspect, body)),
+        {
+          status: 200,
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      );
+    } else {
+      return new Response(
+        JSON.stringify({
+          message: "Prospect not found",
+          success: false,
+        }),
+        {
+          status: 400,
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      );
+    }
   } catch (error: any) {
     return new Response(
       JSON.stringify({
@@ -86,15 +102,31 @@ export async function DELETE(
 ) {
   try {
     const idProspect = Number(params.id_prospect);
-    return new Response(
-      JSON.stringify(await prospectService.delete(idProspect)),
-      {
-        status: 200,
-        headers: {
-          "content-type": "application/json",
-        },
-      }
-    );
+    const prospect = await prospectService.getById(idProspect);
+    if (prospect) {
+      return new Response(
+        JSON.stringify(await prospectService.delete(idProspect)),
+        {
+          status: 200,
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      );
+    } else {
+      return new Response(
+        JSON.stringify({
+          message: "Prospect not found",
+          success: false,
+        }),
+        {
+          status: 400,
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      );
+    }
   } catch (error: any) {
     return new Response(
       JSON.stringify({

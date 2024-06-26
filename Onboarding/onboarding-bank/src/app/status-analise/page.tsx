@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Verifique o status da sua conta no Biobank!',
 }
 
-export default function Home() {
+export default function Status() {
   return (
     <Application>
       <StatusView />

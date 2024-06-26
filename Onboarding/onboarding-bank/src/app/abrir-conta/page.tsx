@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Abra sua conta no Biobank!",
 };
 
-export default function Home() {
+export default function Register() {
   return (
     <Application>
       <RegisterView />

@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  next-app:
+    container_name: next-app
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    # volumes:
+    #   - ./next-app/src:/app/src
+    #   - ./next-app/public:/app/public
+    restart: always
+    ports:
+      - 3005:3005
+    depends_on:
+      - postgresdb
+  postgresdb:
+    container_name: next_postgres
+    image: postgres
+    restart: always
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=onboardning-bank
