@@ -10,6 +10,8 @@ import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
 import { Prospect } from "@/models/prospect/ProspectModel";
 import { useRouter } from "next/navigation";
+import { Calendar } from "primereact/calendar";
+import { Nullable } from "primereact/ts-helpers";
 
 type TipoPessoa = "fisica" | "juridica";
 
@@ -20,6 +22,8 @@ export default function RegisterWidget() {
   const [confimarSenha, setConfirmarSenha] = useState("");
   const [senha, setSenha] = useState("");
   const [tipoPessoa, setTipoPessoa] = useState<TipoPessoa>("fisica");
+  const [dataNascimento, setDatanascimento] = useState<Nullable<Date>>(null);
+  const [telefone, setTelefone] = useState<string>("");
   const toast = useRef<Toast>(null);
   const [result, setResult] = useState<Prospect | null>(null);
   const router = useRouter();
@@ -46,6 +50,8 @@ export default function RegisterWidget() {
         documento,
         email,
         senha,
+        data_nascimento: dataNascimento,
+        telefone,
       }),
     });
 
@@ -125,6 +131,51 @@ export default function RegisterWidget() {
         <section className="container pb-5">
           <Row>
             <Col xs={12} md={6} className="mb-2">
+              <Card>
+                <div>
+                  <h4>Tipo de pessoa</h4>
+                  <p className="text-muted small">Selecione o tipo de pessoa</p>
+                  <div className="d-flex">
+                    <div className="d-flex m-auto flex-column">
+                      <div className="d-flex flex-grow-1">
+                        <InputSwitch
+                          checked={tipoPessoa === "juridica"}
+                          onChange={(e) => {
+                            setTipoPessoa(e.value ? "juridica" : "fisica");
+                            setDocumento("");
+                          }}
+                        />
+                      </div>
+                      <div className="d-flex flex-grow-1">Juridica</div>
+                    </div>
+                    <div className="d-flex m-auto flex-column">
+                      <div className="d-flex flex-grow-1">
+                        <InputSwitch
+                          checked={tipoPessoa === "fisica"}
+                          onChange={(e) => {
+                            setTipoPessoa(e.value ? "fisica" : "juridica");
+                            setDocumento("");
+                          }}
+                        />
+                      </div>
+                      <div className="d-flex flex-grow-1">Fisica</div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </Col>
+            <Col xs={12} md={6} className="mb-2">
+              <Card>
+                <h2>Já tenho conta</h2>
+                <p>Já possui uma conta? clique no botão abaixo para acessar</p>
+                <Button
+                  className="w-100"
+                  label="Acessar minha conta"
+                  onClick={() => router.push("/login")}
+                  />
+              </Card>
+            </Col>
+            <Col xs={12} className="mb-2 mb-md-auto">
               <div>
                 <h4>Nome completo</h4>
                 <p className="text-muted small">
@@ -135,42 +186,11 @@ export default function RegisterWidget() {
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   id="nome"
+                  placeholder="Nome completo"
                 />
               </div>
             </Col>
-            <Col xs={12} md={6} className="mb-2">
-              <div>
-                <h4>Tipo de pessoa</h4>
-                <p className="text-muted small">Selecione o tipo de pessoa</p>
-                <div className="d-flex">
-                  <div className="d-flex m-auto flex-column">
-                    <div className="d-flex flex-grow-1">
-                      <InputSwitch
-                        checked={tipoPessoa === "juridica"}
-                        onChange={(e) => {
-                          setTipoPessoa(e.value ? "juridica" : "fisica");
-                          setDocumento("");
-                        }}
-                      />
-                    </div>
-                    <div className="d-flex flex-grow-1">Juridica</div>
-                  </div>
-                  <div className="d-flex m-auto flex-column">
-                    <div className="d-flex flex-grow-1">
-                      <InputSwitch
-                        checked={tipoPessoa === "fisica"}
-                        onChange={(e) => {
-                          setTipoPessoa(e.value ? "fisica" : "juridica");
-                          setDocumento("");
-                        }}
-                      />
-                    </div>
-                    <div className="d-flex flex-grow-1">Fisica</div>
-                  </div>
-                </div>
-              </div>
-            </Col>
-            <Col xs={12} md={6} className="mb-2">
+            <Col xs={12} md={6} className="mb-2 mb-md-auto">
               <div>
                 <h4>Documento</h4>
                 <p className="text-muted small">Insira seu CPF ou CNPJ</p>
@@ -186,7 +206,7 @@ export default function RegisterWidget() {
                 />
               </div>
             </Col>
-            <Col xs={12} md={6} className="mb-2">
+            <Col xs={12} md={6} className="mb-2 mb-md-auto">
               <div>
                 <h4>Endereço de email</h4>
                 <p className="text-muted small">Insira um email válido</p>
@@ -195,10 +215,41 @@ export default function RegisterWidget() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   id="email"
+                  type="email"
+                  placeholder="Email"
                 />
               </div>
             </Col>
-            <Col xs={12} md={6} className="mb-2">
+            <Col xs={12} md={6} className="mb-2 mb-md-auto">
+              <div>
+                <h4>Data de nascimento</h4>
+                <p className="text-muted small">
+                  Insira sua data de nascimento
+                </p>
+                <Calendar
+                  inputClassName="w-100"
+                  className="w-100"
+                  value={dataNascimento}
+                  onChange={(e) => setDatanascimento(e.value)}
+                  placeholder="Data de nascimento"
+                />
+              </div>
+            </Col>
+            <Col xs={12} md={6} className="mb-2 mb-md-auto">
+              <div>
+                <h4>Telefone de contato</h4>
+                <p className="text-muted small">
+                  Insira um telefone de contato
+                </p>
+                <InputMask
+                  className="w-100"
+                  mask={telefone.length < 15 ? "(99) 9999-9999" : "(99) 99999-9999"}
+                  value={telefone}
+                  onChange={(e: any) => setTelefone(e.target.value)}
+                />
+              </div>
+            </Col>
+            <Col xs={12} md={6} className="mb-2 mb-md-auto">
               <div>
                 <h4>Senha de acesso</h4>
                 <p className="text-muted small">Insira uma senha de acesso</p>
@@ -208,10 +259,11 @@ export default function RegisterWidget() {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   id="senha"
+                  placeholder="Insira sua senha"
                 />
               </div>
             </Col>
-            <Col xs={12} md={6} className="mb-2">
+            <Col xs={12} md={6} className="mb-2 mb-md-auto">
               <div>
                 <h4>Confirmar senha</h4>
                 <p className="text-muted small">Confirme a senha de acesso</p>
@@ -221,6 +273,7 @@ export default function RegisterWidget() {
                   value={confimarSenha}
                   onChange={(e) => setConfirmarSenha(e.target.value)}
                   id="confirmar-senha"
+                  placeholder="Confirme sua senha"
                 />
               </div>
             </Col>

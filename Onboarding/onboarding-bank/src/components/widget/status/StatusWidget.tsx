@@ -53,6 +53,7 @@ export default function StatusWidget() {
                   className="flex-grow-1 me-1"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Digite seu email"
                 />
                 <div className="text-end d-md-block d-none">
                   <Button
@@ -96,6 +97,13 @@ export default function StatusWidget() {
                     </p>
                     <p>
                       <strong>CPF:</strong> {result.documento}
+                    </p>
+                    <p>
+                      <strong>Telefone:</strong> {result.telefone}
+                    </p>
+                    <p>
+                      <strong>Data de nascimento:</strong>{" "}
+                      {new Date(result.data_nascimento).toLocaleDateString()}
                     </p>
                     <p>
                       <strong>Status:</strong>{" "}

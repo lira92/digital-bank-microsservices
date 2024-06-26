@@ -1,6 +1,5 @@
 "use client";
 
-import useURLS from "@/utils/useURLS";
 import VectorHome from "@/vectors/home/VectorHome";
 import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
@@ -8,7 +7,6 @@ import { Card } from "primereact/card";
 import { Col, Row } from "reactstrap";
 
 export default function HomeWidget() {
-  // const ACCOUNT_MENAGEMENT_URL = useURLS("ACCOUNT_MENAGEMENT_URL");
   const router = useRouter();
   return (
     <>
@@ -22,15 +20,15 @@ export default function HomeWidget() {
                 <p>Boas vindas ao banco digital do Biopark!</p>
               </div>
             </Col>
-            <Col>
+            <Col className="my-auto pb-5 pb-md-0">
               {/** <Col className="my-auto pb-5 pb-md-0"> */}
-              {/* <Row>
+              <Row>
                 <Col xs="auto" className="ms-auto">
-                <Button label="Entrar" onClick={()=>{
-                  window.location.href = ACCOUNT_MENAGEMENT_URL;
+                <Button label="Acessar conta" onClick={()=>{
+                  router.push("acessar")
                 }} />
                 </Col>
-              </Row> */}
+              </Row>
             </Col>
           </Row>
         </section>

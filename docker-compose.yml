@@ -151,12 +151,6 @@ services:
     volumes:
       - emprestimo_redis_data:/bitnami/redis/data
 
-volumes:
-  emprestimo_logs:
-  emprestimo_db_data:
-  emprestimo_redis_data:
-  backoffice_data: {}
-
   pagamento:
     build: ./Pagamento
     ports:
@@ -164,3 +158,32 @@ volumes:
     volumes:
       - ./Pagamento:/app
       - /app/__pycache__
+
+  next-app:
+    container_name: next-app
+    build:
+      context: ./Onboarding/onboarding-bank
+      dockerfile: Dockerfile
+    env_file:
+      - ./Onboarding/onboarding-bank/.env
+    restart: always
+    ports:
+      - 3005:3005
+    depends_on:
+      - postgresdb
+  postgresdb:
+    container_name: next_postgres
+    image: postgres
+    restart: always
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=onboardning-bank
+
+volumes:
+  emprestimo_logs:
+  emprestimo_db_data:
+  emprestimo_redis_data:
+  backoffice_data: {}
