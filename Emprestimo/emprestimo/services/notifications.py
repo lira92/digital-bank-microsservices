@@ -35,7 +35,7 @@ class NotificationClient:
             'messageBody': body,
         })
 
-        response = requests.get(
+        response = requests.post(
             urllib.parse.urljoin(self.url, endpoint),
             data=data,
             headers=self.headers,
@@ -44,5 +44,6 @@ class NotificationClient:
             params=params,
             **self.kwargs,
         )
+
         if response.status_code != status.HTTP_200_OK:
             raise NotificationCommunicationException('Error sending notification')

@@ -48,8 +48,8 @@ class AccountClient:
         endpoint = ACCOUNT_CREDIT_ENDPOINT if endpoint is None else endpoint
 
         data = json.dumps({
-            'numero': int(account_number),
-            'valor': float(value),
+            'numero': account_number,
+            'valor': value,
         })
 
         response = requests.patch(
