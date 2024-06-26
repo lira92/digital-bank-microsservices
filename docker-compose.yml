@@ -59,7 +59,6 @@ services:
   contacorrente:
     restart: always
     build: ./ContaCorrente/ContaCorrente
-    # working_dir: /ContaCorrente
     labels:
       - "traefik.http.routers.contacorrente.rule=Path(`/conta-corrente`)"
     environment:
@@ -111,7 +110,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=Dev!123
       - POSTGRES_PORT=5432
-
   backoffice-api:
     build: ./Backoffice/
     container_name: backoffice_api
@@ -159,3 +157,10 @@ volumes:
   emprestimo_redis_data:
   backoffice_data: {}
 
+  pagamento:
+    build: ./Pagamento
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./Pagamento:/app
+      - /app/__pycache__
