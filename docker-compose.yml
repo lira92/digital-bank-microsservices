@@ -24,7 +24,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-        
+
   api-gateway:
     image: traefik:v3.0
     command: --api.insecure=true --providers.docker
@@ -59,7 +59,7 @@ services:
   contacorrente:
     restart: always
     build: ./ContaCorrente/ContaCorrente
-    working_dir: /ContaCorrente
+    # working_dir: /ContaCorrente
     labels:
       - "traefik.http.routers.contacorrente.rule=Path(`/conta-corrente`)"
     environment:
@@ -122,6 +122,40 @@ services:
     ports:
       - '3007:3007'
 
+  emprestimo:
+    build: ./Emprestimo/emprestimo
+    volumes:
+      - ./Emprestimo/emprestimo:/usr/src/app
+      - emprestimo_logs:/var/log/emprestimo
+    ports:
+      - "3001:8000"
+    env_file:
+      - ./Emprestimo/envs/microservices.env
+      - ./Emprestimo/envs/postgres.env
+      - ./Emprestimo/envs/redis.env
+    depends_on:
+      - emprestimo_db
+
+  emprestimo_db:
+    image: postgres:16.3-bullseye
+    restart: unless-stopped
+    volumes:
+      - emprestimo_db_data:/var/lib/postgresql/data/
+    env_file:
+      - ./Emprestimo/envs/postgres.env
+
+  emprestimo_redis:
+    container_name: emprestimo_redis
+    image: bitnami/redis:7.2
+    restart: unless-stopped
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - emprestimo_redis_data:/bitnami/redis/data
+
 volumes:
+  emprestimo_logs:
+  emprestimo_db_data:
+  emprestimo_redis_data:
   backoffice_data: {}
 

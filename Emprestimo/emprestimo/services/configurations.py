@@ -27,7 +27,6 @@ class ConfigurationClient:
 
     def fetch_configurations(self, endpoint=None, params=None):
         endpoint = CONFIGURATIONS_ENDPOINT if endpoint is None else endpoint
-
         response = requests.get(
             urllib.parse.urljoin(self.url, endpoint),
             headers=self.headers,
@@ -36,6 +35,10 @@ class ConfigurationClient:
             params=params,
             **self.kwargs,
         )
+
+        if response.status_code == status.HTTP_404_NOT_FOUND:
+            raise ConfigurationCommunicationException('Configurations are not defined')
+
         if response.status_code != status.HTTP_200_OK:
             raise ConfigurationCommunicationException('Error fetching configurations')
 
