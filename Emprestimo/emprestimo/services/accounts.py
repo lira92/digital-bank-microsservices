@@ -21,7 +21,7 @@ class AccountClient:
 
     def __init__(self, url=None, verify=False, timeout=60, **kwargs):
         self.url = ACCOUNTS_URL if url is None else url
-        self.headers = {'Accept': 'application/json'}
+        self.headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
         self.verify = verify
         self.timeout = timeout
         self.kwargs = kwargs
@@ -48,9 +48,8 @@ class AccountClient:
         endpoint = ACCOUNT_CREDIT_ENDPOINT if endpoint is None else endpoint
 
         data = json.dumps({
-            'nome': 'Emprestimo',
-            'numero': int(account_number),
-            'valor': float(value),
+            'numero': account_number,
+            'valor': value,
         })
 
         response = requests.patch(
