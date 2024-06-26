@@ -19,8 +19,8 @@ Rails.application.routes.draw do
   # Endpoints dos outros microsserviços
   get '/emprestimos', to: 'emprestimos#teste_emprestimos', as: 'emprestimos'
   post '/validar_emprestimo', to: 'emprestimos#teste_validar_emprestimo', as: 'validar_emprestimo'
-  get '/api/upstream/prospect', to: 'onboarding#teste_upstream_prospect', as: 'onboarding_prospect'
-  put '/api/downstream/prospect', to: 'onboarding#teste_downstream_prospect', as: 'teste_put'
+  get '/api/prospect', to: 'onboarding#teste_upstream_prospect', as: 'onboarding_prospect'
+  put '/api/prospect', to: 'onboarding#teste_downstream_prospect', as: 'teste_put'
 
   get "up" => "rails/health#show", as: :rails_health_check
 end
