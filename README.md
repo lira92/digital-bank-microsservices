@@ -21,8 +21,16 @@ curl ...
 
 ## Como criar um prospect (que poderá vir a ter uma conta corrente)
 
+Mais detalhes em: https://documenter.getpostman.com/view/10111188/2sA3XWdymm
+
 ```
-curl ...
+curl --location 'http://localhost:3005/api/prospect' \
+--data-raw '{
+    "nome": "Lucas Neitzke",
+    "senha": "132456789",
+    "email": "luka.pc.pc@gmail.com",
+    "documento": "101.247.089-00"
+}'
 ```
 
 ## Como solicitar um empréstimo
