@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_23_212152) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_28_001127) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -29,7 +29,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_23_212152) do
   end
 
   create_table "emprestimos", force: :cascade do |t|
-    t.integer "emprestimo_id"
+    t.string "emprestimo_id"
     t.bigint "conta"
     t.float "valor"
     t.integer "status", default: 0, null: false

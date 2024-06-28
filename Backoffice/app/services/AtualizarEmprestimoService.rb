@@ -17,19 +17,22 @@ class AtualizarEmprestimoService
   def salvar_novos_emprestimos
     return nil unless @response.success?
 
-    emprestimos = JSON.parse @response.body
+    response_json = JSON.parse @response.body
+    return nil if response_json['emprestimos'].size <= 0
+
     quantidade_emprestimos_salvos = 0
 
-    emprestimos.each do |emprestimo_data|
+    response_json['emprestimos'].each do |emprestimo_data|
       emprestimo = Emprestimo.new(
-        emprestimo_id: emprestimo_data['emprestimo'],
-        conta: emprestimo_data['conta'],
+        emprestimo_id: emprestimo_data['id'],
+        conta: emprestimo_data['numero_conta'],
         valor: emprestimo_data['valor'],
         status: emprestimo_data['status']
       )
       quantidade_emprestimos_salvos += 1 if emprestimo.save
     end
-
-    quantidade_emprestimos_salvos
+    emprestimos = Emprestimo.where status: 0
+ 
+    emprestimos
   end
 end

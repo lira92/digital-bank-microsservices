@@ -1,7 +1,7 @@
 production:
-  api_emprestimo: 'http://localhost:3001'
-  api_onboarding: 'http://localhost:3005'
+  api_emprestimo: 'http://emprestimo:8000'
+  api_onboarding: 'http://next-app:3005'
 
 development:
-  api_emprestimo: 'http://localhost:3001'
-  api_onboarding: 'http://localhost:3005'
+  api_emprestimo: 'http://emprestimo:8000'
+  api_onboarding: 'http://next-app:3005'

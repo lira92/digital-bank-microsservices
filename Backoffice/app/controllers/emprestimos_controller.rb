@@ -4,10 +4,10 @@ class EmprestimosController < ApplicationController
   end
 
   def pegar_emprestimos
-    qtd_salvos = AtualizarEmprestimoService.new.call
-    return render json: { message: 'Nenhum dado novo para atualizar' }, status: :no_content if qtd_salvos.nil? || qtd_salvos.zero?
+    emprestimos = AtualizarEmprestimoService.new.call
+    return render json: { message: 'Nenhum dado novo para atualizar' }, status: :no_content if emprestimos.nil?
 
-    render json: { novos_emprestimos: qtd_salvos }, status: 200
+    render json: { emprestimos_pendentes: emprestimos }, status: 200
   end
 
   def enviar_resultado_validacao
@@ -22,7 +22,7 @@ class EmprestimosController < ApplicationController
   def teste_emprestimos
     emprestimos = [
       {
-        emprestimo: 15,
+        emprestimo_id: 15,
         conta: 1,
         valor: 15,
         status: 'pendente'

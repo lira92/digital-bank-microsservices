@@ -7,6 +7,8 @@ class EnviarAprovacaoOuReprovacaoService
   def call
     pegar_emprestimo
     enviar_requisicao
+    atualizar_emprestimo
+    @response
   end
 
   private
@@ -20,8 +22,14 @@ class EnviarAprovacaoOuReprovacaoService
 
   def enviar_requisicao
     uri = URI("#{ENV['api_emprestimo']}/validar_emprestimo")
-    params = { emprestimo: @emprestimo.id, aprovado: @new_status }
+    params = { id: @emprestimo.emprestimo_id, aprovado: @new_status }
     headers = { 'Content-Type': 'application/json' }
     @response = Faraday.post uri, params.to_json, headers
+
+    return nil unless @response.success?
+  end
+
+  def atualizar_emprestimo
+    @emprestimo.update status: 1
   end
 end
